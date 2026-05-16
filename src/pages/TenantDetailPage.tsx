@@ -86,53 +86,53 @@ const TenantDetailPage = () => {
     }
   };
 
-  if (loading) return <div className="h-96 flex items-center justify-center"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div></div>;
+  if (loading) return <div className="h-64 flex items-center justify-center"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div></div>;
   if (!tenant) return <div>Tenant not found</div>;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Breadcrumbs */}
-      <nav className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-        <button onClick={() => navigate('/tenants')} className="hover:text-primary transition-colors">{t('common.tenants')}</button>
-        <ChevronRight size={12} />
+      <nav className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+        <button onClick={() => navigate('/tenants')} className="hover:text-primary transition-colors uppercase">{t('common.tenants')}</button>
+        <ChevronRight size={10} />
         <span className="text-foreground">{tenant.name}</span>
       </nav>
 
       {/* Header Card */}
-      <div className="bg-card rounded-3xl border border-border p-8 shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 -mr-20 -mt-20 rounded-full blur-3xl"></div>
+      <div className="bg-card rounded-xl border border-border p-5 shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 -mr-16 -mt-16 rounded-full blur-3xl"></div>
         
-        <div className="flex flex-wrap items-start justify-between gap-6 relative z-10">
-          <div className="flex gap-6">
-            <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary to-indigo-600 flex items-center justify-center text-primary-foreground shadow-xl shadow-primary/20">
-              <Building2 size={40} />
+        <div className="flex flex-wrap items-center justify-between gap-4 relative z-10">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-indigo-600 flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/20">
+              <Building2 size={28} />
             </div>
             <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-3xl font-extrabold tracking-tight">{tenant.name}</h1>
-                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase border ${
+              <div className="flex items-center gap-2 mb-1">
+                <h1 className="text-xl font-bold tracking-tight">{tenant.name}</h1>
+                <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase border ${
                   tenant.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-rose-500/10 text-rose-500 border-rose-500/20'
                 }`}>
                   {tenant.status}
                 </span>
               </div>
-              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1.5"><Globe size={14} /> {tenant.alias}</span>
-                <span className="flex items-center gap-1.5"><Crown size={14} /> {tenant.subscriptionPlan}</span>
-                <span className="flex items-center gap-1.5"><HardDrive size={14} /> {tenant.storageQuota.usedMB}/{tenant.storageQuota.limitMB} MB</span>
+              <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground font-medium">
+                <span className="flex items-center gap-1"><Globe size={12} /> {tenant.alias}</span>
+                <span className="flex items-center gap-1"><Crown size={12} /> {tenant.subscriptionPlan}</span>
+                <span className="flex items-center gap-1"><HardDrive size={12} /> {tenant.storageQuota.usedMB}/{tenant.storageQuota.limitMB} MB</span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 bg-accent hover:bg-border px-5 py-2.5 rounded-xl font-bold transition-all text-sm">
-              <Activity size={18} />
+          <div className="flex items-center gap-2">
+            <button className="flex items-center gap-1.5 bg-accent hover:bg-border px-3 py-1.5 rounded-lg font-bold transition-all text-xs">
+              <Activity size={14} />
               Logs
             </button>
-            <button className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all text-sm ${
+            <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all text-xs ${
               tenant.status === 'ACTIVE' ? 'bg-rose-500/10 text-rose-500 hover:bg-rose-500/20' : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20'
             }`}>
-              {tenant.status === 'ACTIVE' ? <PowerOff size={18} /> : <Power size={18} />}
+              {tenant.status === 'ACTIVE' ? <PowerOff size={14} /> : <Power size={14} />}
               {tenant.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
             </button>
           </div>
@@ -140,14 +140,14 @@ const TenantDetailPage = () => {
       </div>
 
       {/* Permission Manager */}
-      <div className="bg-card rounded-3xl border border-border p-8 shadow-sm">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-            <Shield size={20} />
+      <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+        <div className="flex items-center gap-2 mb-6">
+          <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+            <Shield size={16} />
           </div>
           <div>
-            <h2 className="text-xl font-bold">Access Control</h2>
-            <p className="text-sm text-muted-foreground">Configure feature flags and core permissions for this workspace.</p>
+            <h2 className="text-lg font-bold leading-none">Access Control</h2>
+            <p className="text-xs text-muted-foreground mt-1">Configure feature flags and core permissions for this workspace.</p>
           </div>
         </div>
 

@@ -57,7 +57,7 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
-    --radius: 0.75rem;
+    --radius: 0.5rem;
     
     --success: 142.1 70.6% 45.3%;
     --warning: 37.9 97.2% 53.9%;
@@ -90,10 +90,15 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border cursor-default;
   }
+  
+  a, button, [role="button"], input[type="checkbox"], input[type="radio"], select {
+    @apply cursor-pointer;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
     font-family: var(--font-sans);
   }

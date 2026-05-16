@@ -41,7 +41,7 @@ const TenantTable: React.FC<TenantTableProps> = ({ tenants, onBulkAction }) => {
   });
 
   const toggleSelectAll = () => {
-    if (selectedIds.size === filtered.length) {
+    if (selectedIds.size === filtered.length && filtered.length > 0) {
       setSelectedIds(new Set());
     } else {
       setSelectedIds(new Set(filtered.map(t => t._id || t.id)));
@@ -73,28 +73,27 @@ const TenantTable: React.FC<TenantTableProps> = ({ tenants, onBulkAction }) => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-card p-4 rounded-2xl border border-border shadow-sm">
-        <div className="flex items-center gap-3 flex-1 min-w-[300px]">
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-card p-3 rounded-xl border border-border shadow-sm">
+        <div className="flex items-center gap-2 flex-1 min-w-[280px]">
           <div className="relative flex-1">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input 
               type="text"
               placeholder={t('common.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-accent/50 border-none rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+              className="w-full bg-accent/50 border-none rounded-lg pl-9 pr-4 py-1.5 text-xs focus:ring-2 focus:ring-primary/20 outline-none transition-all"
             />
           </div>
           <select 
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-accent/50 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/20 outline-none cursor-pointer"
+            className="bg-accent/50 border-none rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-primary/20 outline-none cursor-pointer"
           >
             <option value="ALL">All Status</option>
             <option value="ACTIVE">Active</option>
             <option value="SUSPENDED">Suspended</option>
-            <option value="PENDING">Pending</option>
           </select>
         </div>
 
@@ -102,57 +101,57 @@ const TenantTable: React.FC<TenantTableProps> = ({ tenants, onBulkAction }) => {
           <AnimatePresence>
             {selectedIds.size > 0 && (
               <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="flex items-center gap-2 bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-xl mr-2"
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="flex items-center gap-2 bg-primary/10 border border-primary/20 px-2 py-1 rounded-lg mr-1"
               >
-                <span className="text-xs font-bold text-primary">{selectedIds.size} selected</span>
-                <div className="w-px h-4 bg-primary/20 mx-1"></div>
+                <span className="text-[10px] font-bold text-primary tracking-tight">{selectedIds.size} SELECTED</span>
+                <div className="w-px h-3 bg-primary/20 mx-1"></div>
                 <button 
                   onClick={() => onBulkAction?.(Array.from(selectedIds), 'suspend')}
-                  className="p-1 hover:bg-primary/10 rounded-lg text-primary transition-colors"
+                  className="p-1 hover:bg-primary/10 rounded text-primary transition-colors"
                   title="Suspend selected"
                 >
-                  <ShieldAlert size={16} />
+                  <ShieldAlert size={14} />
                 </button>
                 <button 
                   onClick={() => onBulkAction?.(Array.from(selectedIds), 'delete')}
-                  className="p-1 hover:bg-destructive/10 rounded-lg text-destructive transition-colors"
+                  className="p-1 hover:bg-destructive/10 rounded text-destructive transition-colors"
                   title="Delete selected"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={14} />
                 </button>
               </motion.div>
             )}
           </AnimatePresence>
           
-          <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-accent hover:bg-accent/80 text-sm font-medium transition-colors">
-            <Download size={16} />
+          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent hover:bg-accent/80 text-xs font-semibold transition-colors">
+            <Download size={14} />
             Export
           </button>
         </div>
       </div>
 
-      <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
+      <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-border bg-accent/30">
-                <th className="px-6 py-4 w-10">
+                <th className="px-4 py-3 w-8">
                   <input 
                     type="checkbox"
                     checked={selectedIds.size === filtered.length && filtered.length > 0}
                     onChange={toggleSelectAll}
-                    className="rounded border-border text-primary focus:ring-primary/20 h-4 w-4"
+                    className="rounded border-border text-primary focus:ring-primary/20 h-3.5 w-3.5"
                   />
                 </th>
-                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('tenants.table.name')}</th>
-                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('tenants.table.plan')}</th>
-                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('tenants.table.status')}</th>
-                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Permissions</th>
-                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('tenants.table.createdAt')}</th>
-                <th className="px-6 py-4"></th>
+                <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t('tenants.table.name')}</th>
+                <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t('tenants.table.plan')}</th>
+                <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t('tenants.table.status')}</th>
+                <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Permissions</th>
+                <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t('tenants.table.createdAt')}</th>
+                <th className="px-4 py-3"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -169,42 +168,42 @@ const TenantTable: React.FC<TenantTableProps> = ({ tenants, onBulkAction }) => {
                     className={`group hover:bg-accent/30 transition-colors cursor-pointer ${isSelected ? 'bg-primary/5' : ''}`}
                     onClick={() => navigate(`/tenants/${id}`)}
                   >
-                    <td className="px-6 py-4" onClick={(e) => { e.stopPropagation(); toggleSelect(id); }}>
+                    <td className="px-4 py-2.5" onClick={(e) => { e.stopPropagation(); toggleSelect(id); }}>
                       <input 
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => {}}
-                        className="rounded border-border text-primary focus:ring-primary/20 h-4 w-4"
+                        className="rounded border-border text-primary focus:ring-primary/20 h-3.5 w-3.5"
                       />
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-2.5">
                       <div>
-                        <div className="font-semibold text-foreground group-hover:text-primary transition-colors">{tenant.name}</div>
-                        <div className="text-xs text-muted-foreground">{tenant.alias}</div>
+                        <div className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{tenant.name}</div>
+                        <div className="text-[10px] text-muted-foreground">{tenant.alias}</div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${getPlanStyles(tenant.subscriptionPlan)}`}>
+                    <td className="px-4 py-2.5">
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${getPlanStyles(tenant.subscriptionPlan)}`}>
                         {tenant.subscriptionPlan}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
+                    <td className="px-4 py-2.5">
+                      <div className="flex items-center gap-1.5">
                         <div className={`w-1.5 h-1.5 rounded-full ${getStatusStyles(tenant.status).replace('bg-', 'bg-').split(' ')[0].replace('-100', '-500')}`}></div>
-                        <span className={`text-xs font-medium ${getStatusStyles(tenant.status).split(' ')[1]}`}>
+                        <span className={`text-[11px] font-medium ${getStatusStyles(tenant.status).split(' ')[1]}`}>
                           {tenant.status}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">
+                    <td className="px-4 py-2.5 text-[11px] text-muted-foreground font-medium">
                       {tenant.availablePermissions?.length || 0} granted
                     </td>
-                    <td className="px-6 py-4 text-xs text-muted-foreground">
+                    <td className="px-4 py-2.5 text-[10px] text-muted-foreground">
                       {new Date(tenant.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <button className="p-2 rounded-lg hover:bg-accent text-muted-foreground opacity-0 group-hover:opacity-100 transition-all">
-                        <MoreHorizontal size={18} />
+                    <td className="px-4 py-2.5 text-right">
+                      <button className="p-1.5 rounded-lg hover:bg-accent text-muted-foreground opacity-0 group-hover:opacity-100 transition-all">
+                        <MoreHorizontal size={14} />
                       </button>
                     </td>
                   </motion.tr>
@@ -215,12 +214,12 @@ const TenantTable: React.FC<TenantTableProps> = ({ tenants, onBulkAction }) => {
         </div>
         
         {filtered.length === 0 && (
-          <div className="p-12 text-center">
-            <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4 text-muted-foreground">
-              <Search size={32} />
+          <div className="p-8 text-center">
+            <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center mx-auto mb-3 text-muted-foreground">
+              <Search size={24} />
             </div>
-            <h3 className="text-lg font-semibold mb-1">No tenants found</h3>
-            <p className="text-muted-foreground text-sm">Try adjusting your search or filters to find what you're looking for.</p>
+            <h3 className="text-sm font-bold mb-0.5">No tenants found</h3>
+            <p className="text-muted-foreground text-[11px]">Try adjusting your search or filters to find what you're looking for.</p>
           </div>
         )}
       </div>
