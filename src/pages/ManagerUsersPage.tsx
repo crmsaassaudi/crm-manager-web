@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   CheckCircle2,
   KeyRound,
@@ -12,6 +13,7 @@ import {
 import * as api from '../api';
 
 const ManagerUsersPage = () => {
+  const { t } = useTranslation();
   const [users, setUsers] = useState<api.ManagerUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -71,14 +73,14 @@ const ManagerUsersPage = () => {
       await loadUsers();
 
       if (created.temporaryPassword) {
-        setMessage(`Created. Temporary password: ${created.temporaryPassword}`);
+        setMessage(t('managerUsers.userCreatedWithPass', { password: created.temporaryPassword }));
       } else if (created.inviteError) {
-        setMessage(`Created, but invite failed: ${created.inviteError}`);
+        setMessage(t('managerUsers.userCreatedWithInviteError', { error: created.inviteError }));
       } else {
-        setMessage('Manager user created and invite email queued.');
+        setMessage(t('managerUsers.userCreated'));
       }
     } catch (error: any) {
-      setMessage(error.response?.data?.message || 'Could not create user.');
+      setMessage(error.response?.data?.message || t('managerUsers.createError'));
     } finally {
       setSaving(false);
     }
@@ -92,9 +94,9 @@ const ManagerUsersPage = () => {
         status: user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE',
       });
       await loadUsers();
-      setMessage('Manager user status updated.');
+      setMessage(t('managerUsers.statusUpdated'));
     } catch (error: any) {
-      setMessage(error.response?.data?.message || 'Could not update user.');
+      setMessage(error.response?.data?.message || t('managerUsers.updateError'));
     } finally {
       setSaving(false);
     }
@@ -113,10 +115,10 @@ const ManagerUsersPage = () => {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Manager Users
+            {t('managerUsers.title')}
           </h1>
           <p className="text-[13px] text-slate-500 font-medium mt-1">
-            Create platform users that can sign in to this manager console.
+            {t('managerUsers.subtitle')}
           </p>
         </div>
         {message && (
@@ -134,10 +136,10 @@ const ManagerUsersPage = () => {
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                Add Manager User
+                {t('managerUsers.addUser')}
               </h2>
               <p className="text-[12px] text-slate-500">
-                Tenant-scoped permissions will be added later.
+                {t('managerUsers.addUserDesc')}
               </p>
             </div>
           </div>
@@ -152,7 +154,7 @@ const ManagerUsersPage = () => {
                     firstName: event.target.value,
                   }))
                 }
-                placeholder="First name"
+                placeholder={t('managerUsers.firstName')}
                 className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900"
               />
               <input
@@ -163,7 +165,7 @@ const ManagerUsersPage = () => {
                     lastName: event.target.value,
                   }))
                 }
-                placeholder="Last name"
+                placeholder={t('managerUsers.lastName')}
                 className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900"
               />
             </div>
@@ -200,7 +202,7 @@ const ManagerUsersPage = () => {
                   }))
                 }
                 type="password"
-                placeholder="Temporary password, optional"
+                placeholder={t('managerUsers.tempPasswordOptional')}
                 className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900"
               />
             </div>
@@ -215,7 +217,7 @@ const ManagerUsersPage = () => {
                   }))
                 }
               />
-              Send Keycloak password setup email
+              {t('managerUsers.sendInvite')}
             </label>
             <button
               type="submit"
@@ -223,7 +225,7 @@ const ManagerUsersPage = () => {
               className="w-full h-10 rounded-lg bg-primary text-white text-[13px] font-bold disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {saving ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} />}
-              Create manager user
+              {t('managerUsers.createButton')}
             </button>
           </form>
         </section>
@@ -236,10 +238,10 @@ const ManagerUsersPage = () => {
               </div>
               <div>
                 <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                  Console Access
+                  {t('managerUsers.consoleAccess')}
                 </h2>
                 <p className="text-[12px] text-slate-500">
-                  {users.length} manager account(s)
+                  {t('managerUsers.consoleAccessDesc', { count: users.length })}
                 </p>
               </div>
             </div>
@@ -251,7 +253,7 @@ const ManagerUsersPage = () => {
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search users"
+                placeholder={t('managerUsers.searchUsers')}
                 className="w-64 rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900"
               />
             </div>
@@ -262,16 +264,16 @@ const ManagerUsersPage = () => {
               <thead className="bg-slate-50/70 dark:bg-slate-800/30">
                 <tr>
                   <th className="px-4 py-3 text-[11px] font-bold uppercase text-slate-500">
-                    User
+                    {t('managerUsers.tableUser')}
                   </th>
                   <th className="px-4 py-3 text-[11px] font-bold uppercase text-slate-500">
-                    Keycloak
+                    {t('managerUsers.tableKeycloak')}
                   </th>
                   <th className="px-4 py-3 text-[11px] font-bold uppercase text-slate-500">
-                    Status
+                    {t('managerUsers.tableStatus')}
                   </th>
                   <th className="px-4 py-3 text-right text-[11px] font-bold uppercase text-slate-500">
-                    Action
+                    {t('managerUsers.tableAction')}
                   </th>
                 </tr>
               </thead>
@@ -288,7 +290,7 @@ const ManagerUsersPage = () => {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2 text-[12px] font-semibold text-slate-500">
                         <CheckCircle2 size={15} className="text-emerald-500" />
-                        {user.keycloakId ? 'Linked' : 'Missing'}
+                        {user.keycloakId ? t('managerUsers.linked') : t('managerUsers.missing')}
                       </div>
                     </td>
                     <td className="px-4 py-3">
@@ -308,7 +310,7 @@ const ManagerUsersPage = () => {
                         disabled={saving}
                         className="rounded-lg border border-slate-200 px-3 py-1.5 text-[12px] font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800"
                       >
-                        {user.status === 'ACTIVE' ? 'Disable' : 'Enable'}
+                        {user.status === 'ACTIVE' ? t('managerUsers.disable') : t('managerUsers.enable')}
                       </button>
                     </td>
                   </tr>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Check,
   Layers,
@@ -23,6 +24,7 @@ const groupPermissions = (permissions: string[]) =>
   }, {});
 
 const PermissionGroupsPage = () => {
+  const { t } = useTranslation();
   const [catalog, setCatalog] = useState<Catalog>({
     featurePermissions: [],
     corePermissions: [],
@@ -124,30 +126,30 @@ const PermissionGroupsPage = () => {
       };
       if (editingId) {
         await api.updatePermissionGroup(editingId, payload);
-        setMessage('Permission group updated.');
+        setMessage(t('permissionGroups.groupUpdated'));
       } else {
         await api.createPermissionGroup(payload);
-        setMessage('Permission group created.');
+        setMessage(t('permissionGroups.groupCreated'));
       }
       resetForm();
       await loadData();
     } catch (error: any) {
-      setMessage(error.response?.data?.message || 'Could not save group.');
+      setMessage(error.response?.data?.message || t('permissionGroups.saveError'));
     } finally {
       setSaving(false);
     }
   };
 
   const removeGroup = async (group: api.PermissionGroup) => {
-    if (!window.confirm(`Delete "${group.name}"?`)) return;
+    if (!window.confirm(t('permissionGroups.deleteConfirm', { name: group.name }))) return;
     setSaving(true);
     setMessage(null);
     try {
       await api.deletePermissionGroup(group.id);
-      setMessage('Permission group deleted.');
+      setMessage(t('permissionGroups.groupDeleted'));
       await loadData();
     } catch (error: any) {
-      setMessage(error.response?.data?.message || 'Could not delete group.');
+      setMessage(error.response?.data?.message || t('permissionGroups.deleteError'));
     } finally {
       setSaving(false);
     }
@@ -162,10 +164,10 @@ const PermissionGroupsPage = () => {
         tenantIds: Array.from(selectedTenantIds),
         mode: applyMode,
       });
-      setMessage('Permission group applied to selected tenants.');
+      setMessage(t('permissionGroups.applySuccess'));
       setSelectedTenantIds(new Set());
     } catch (error: any) {
-      setMessage(error.response?.data?.message || 'Could not apply group.');
+      setMessage(error.response?.data?.message || t('permissionGroups.applyError'));
     } finally {
       setSaving(false);
     }
@@ -184,10 +186,10 @@ const PermissionGroupsPage = () => {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Permission Groups
+            {t('permissionGroups.title')}
           </h1>
           <p className="text-[13px] text-slate-500 font-medium mt-1">
-            Build reusable feature bundles and apply them to tenant batches.
+            {t('permissionGroups.subtitle')}
           </p>
         </div>
         {message && (
@@ -206,10 +208,10 @@ const PermissionGroupsPage = () => {
               </div>
               <div>
                 <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                  Saved Groups
+                  {t('permissionGroups.savedGroups')}
                 </h2>
                 <p className="text-[12px] text-slate-500">
-                  {groups.length} reusable bundles
+                  {t('permissionGroups.savedGroupsDesc', { count: groups.length })}
                 </p>
               </div>
             </div>
@@ -218,7 +220,7 @@ const PermissionGroupsPage = () => {
               className="flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-[12px] font-bold text-white shadow-sm"
             >
               <Plus size={15} />
-              New group
+              {t('permissionGroups.newGroup')}
             </button>
           </div>
 
@@ -230,22 +232,22 @@ const PermissionGroupsPage = () => {
               >
                 <div className="min-w-[240px] flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-[15px] font-bold text-slate-900 dark:text-slate-100">
+                    <h3 className="text-[15px] font-bold text-slate-900 dark:text-white">
                       {group.name}
                     </h3>
                     {group.isSystem && (
                       <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-500 dark:bg-slate-800">
-                        System
+                        {t('permissionGroups.system')}
                       </span>
                     )}
                   </div>
                   <p className="mt-1 text-[12px] text-slate-500">
-                    {group.description || 'No description'}
+                    {group.description || t('permissionGroups.noDescription')}
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {group.permissions.length === 0 ? (
                       <span className="rounded-md bg-slate-50 px-2 py-1 text-[11px] font-semibold text-slate-400 dark:bg-slate-900">
-                        Core only
+                        {t('permissionGroups.coreOnly')}
                       </span>
                     ) : (
                       group.permissions.slice(0, 8).map((permission) => (
@@ -268,7 +270,7 @@ const PermissionGroupsPage = () => {
                   <button
                     onClick={() => editGroup(group)}
                     className="h-9 w-9 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800 flex items-center justify-center"
-                    title="Edit"
+                    title={t('permissionGroups.edit')}
                   >
                     <Pencil size={15} />
                   </button>
@@ -276,7 +278,7 @@ const PermissionGroupsPage = () => {
                     <button
                       onClick={() => void removeGroup(group)}
                       className="h-9 w-9 rounded-lg border border-rose-200 text-rose-500 hover:bg-rose-50 dark:border-rose-900/60 dark:hover:bg-rose-500/10 flex items-center justify-center"
-                      title="Delete"
+                      title={t('permissionGroups.delete')}
                     >
                       <Trash2 size={15} />
                     </button>
@@ -290,19 +292,19 @@ const PermissionGroupsPage = () => {
         <aside className="space-y-6">
           <section className="bg-white dark:bg-[#0F172A] rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
             <h2 className="text-base font-bold text-slate-900 dark:text-white">
-              {editingId ? 'Edit Group' : 'Create Group'}
+              {editingId ? t('permissionGroups.editGroup') : t('permissionGroups.createGroup')}
             </h2>
             <div className="mt-4 space-y-3">
               <input
                 value={name}
                 onChange={(event) => setName(event.target.value)}
-                placeholder="Group name"
+                placeholder={t('permissionGroups.groupName')}
                 className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900"
               />
               <textarea
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
-                placeholder="Description"
+                placeholder={t('permissionGroups.description')}
                 rows={3}
                 className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900"
               />
@@ -314,7 +316,7 @@ const PermissionGroupsPage = () => {
                 <input
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search feature permissions"
+                  placeholder={t('permissionGroups.searchPermissions')}
                   className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900"
                 />
               </div>
@@ -355,14 +357,14 @@ const PermissionGroupsPage = () => {
                 className="w-full h-10 rounded-lg bg-primary text-white text-[13px] font-bold disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <Save size={15} />
-                {saving ? 'Saving...' : 'Save group'}
+                {saving ? t('permissionGroups.saving') : t('permissionGroups.saveGroup')}
               </button>
             </div>
           </section>
 
           <section className="bg-white dark:bg-[#0F172A] rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
             <h2 className="text-base font-bold text-slate-900 dark:text-white">
-              Apply To Tenants
+              {t('permissionGroups.applyToTenants')}
             </h2>
             <div className="mt-4 space-y-3">
               <select
@@ -387,7 +389,7 @@ const PermissionGroupsPage = () => {
                         : 'border-slate-200 text-slate-500 dark:border-slate-800'
                     }`}
                   >
-                    {mode}
+                    {mode === 'replace' ? t('permissionGroups.replace') : t('permissionGroups.merge')}
                   </button>
                 ))}
               </div>
@@ -418,7 +420,7 @@ const PermissionGroupsPage = () => {
                 disabled={!selectedGroup || selectedTenantIds.size === 0 || saving}
                 className="w-full h-10 rounded-lg bg-slate-900 text-white text-[13px] font-bold disabled:opacity-50 dark:bg-white dark:text-slate-900"
               >
-                Apply selected group
+                {t('permissionGroups.applySelected')}
               </button>
             </div>
           </section>

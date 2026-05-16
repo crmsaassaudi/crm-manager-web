@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
   Building2,
@@ -12,6 +13,7 @@ import {
 import * as api from '../api';
 
 const CustomerOnboardingPage = () => {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     companyName: '',
     adminEmail: '',
@@ -40,12 +42,12 @@ const CustomerOnboardingPage = () => {
         const next = await api.fetchProvisioningStatus(provisioningId);
         setStatus(next);
       } catch {
-        setMessage('Waiting for provisioning status from crm-api.');
+        setMessage(t('onboarding.waitingStatus'));
       }
     }, 2000);
 
     return () => window.clearInterval(timer);
-  }, [provisioningId]);
+  }, [provisioningId, t]);
 
   useEffect(() => {
     if (
@@ -77,11 +79,11 @@ const CustomerOnboardingPage = () => {
         status: result.status,
         currentStep: 0,
         totalSteps: 9,
-        stepLabel: 'Queued in crm-api.',
+        stepLabel: t('onboarding.queued'),
       });
-      setMessage(`Provisioning queued with id ${result.provisioningId}.`);
+      setMessage(t('onboarding.provisioningQueued', { id: result.provisioningId }));
     } catch (error: any) {
-      setMessage(error.response?.data?.message || 'Could not start onboarding.');
+      setMessage(error.response?.data?.message || t('onboarding.onboardingError'));
     } finally {
       setSubmitting(false);
     }
@@ -96,9 +98,9 @@ const CustomerOnboardingPage = () => {
         role: 'OWNER',
       });
       setInviteSent(true);
-      setMessage('Owner invite sent. The customer can set a password and log in.');
+      setMessage(t('onboarding.inviteSentSuccess'));
     } catch (error: any) {
-      setMessage(error.response?.data?.message || 'Could not send invite.');
+      setMessage(error.response?.data?.message || t('onboarding.inviteError'));
     } finally {
       setInviteSending(false);
     }
@@ -112,10 +114,10 @@ const CustomerOnboardingPage = () => {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Customer Onboarding
+            {t('onboarding.title')}
           </h1>
           <p className="text-[13px] text-slate-500 font-medium mt-1">
-            Provision a new tenant through crm-api and send the owner account setup email.
+            {t('onboarding.subtitle')}
           </p>
         </div>
         {message && (
@@ -133,10 +135,10 @@ const CustomerOnboardingPage = () => {
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                New Customer
+                {t('onboarding.newCustomer')}
               </h2>
               <p className="text-[12px] text-slate-500">
-                Uses the internal tenant provisioning flow in crm-api.
+                {t('onboarding.provisioningFlow')}
               </p>
             </div>
           </div>
@@ -156,7 +158,7 @@ const CustomerOnboardingPage = () => {
                   }))
                 }
                 required
-                placeholder="Company name"
+                placeholder={t('onboarding.companyName')}
                 className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900"
               />
             </div>
@@ -174,7 +176,7 @@ const CustomerOnboardingPage = () => {
                   }))
                 }
                 required
-                placeholder="Owner full name"
+                placeholder={t('onboarding.ownerName')}
                 className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900"
               />
             </div>
@@ -193,7 +195,7 @@ const CustomerOnboardingPage = () => {
                 }
                 type="email"
                 required
-                placeholder="owner@customer.com"
+                placeholder={t('onboarding.ownerEmail')}
                 className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900"
               />
             </div>
@@ -222,7 +224,7 @@ const CustomerOnboardingPage = () => {
                   }))
                 }
               />
-              Send password setup invite when provisioning is ready
+              {t('onboarding.autoInvite')}
             </label>
             <button
               type="submit"
@@ -234,7 +236,7 @@ const CustomerOnboardingPage = () => {
               ) : (
                 <ArrowRight size={15} />
               )}
-              Start onboarding
+              {t('onboarding.startButton')}
             </button>
           </form>
         </section>
@@ -243,10 +245,10 @@ const CustomerOnboardingPage = () => {
           <div className="flex items-center justify-between gap-4">
             <div>
               <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                Provisioning Status
+                {t('onboarding.provisioningStatus')}
               </h2>
               <p className="text-[12px] text-slate-500 mt-1">
-                {provisioningId || 'No provisioning job running.'}
+                {provisioningId || t('onboarding.noJobRunning')}
               </p>
             </div>
             <div
@@ -258,7 +260,7 @@ const CustomerOnboardingPage = () => {
                     : 'bg-slate-100 text-slate-500 dark:bg-slate-800'
               }`}
             >
-              {status?.status || 'Idle'}
+              {status?.status || t('onboarding.idle')}
             </div>
           </div>
 
@@ -275,12 +277,12 @@ const CustomerOnboardingPage = () => {
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                {status?.stepLabel || 'Ready for the next customer.'}
+                {status?.stepLabel || t('onboarding.readyDesc')}
               </h3>
               <p className="mt-1 text-[13px] text-slate-500">
                 {status
-                  ? `Step ${status.currentStep} of ${status.totalSteps}`
-                  : 'Submit the form to start the crm-api SLG onboarding flow.'}
+                  ? t('onboarding.stepLabel', { current: status.currentStep, total: status.totalSteps })
+                  : t('onboarding.submitFormDesc')}
               </p>
             </div>
           </div>
@@ -301,7 +303,7 @@ const CustomerOnboardingPage = () => {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Open tenant login
+                  {t('onboarding.openLogin')}
                 </a>
               )}
             </div>
@@ -312,7 +314,7 @@ const CustomerOnboardingPage = () => {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h3 className="text-[14px] font-bold text-emerald-700 dark:text-emerald-300">
-                    Tenant is ready
+                    {t('onboarding.readyTitle')}
                   </h3>
                   <p className="text-[12px] text-emerald-700/80 dark:text-emerald-300/80">
                     Tenant id: {status.tenantId}
@@ -328,7 +330,7 @@ const CustomerOnboardingPage = () => {
                   ) : (
                     <Send size={14} />
                   )}
-                  {inviteSent ? 'Invite sent' : 'Send owner invite'}
+                  {inviteSent ? t('onboarding.inviteSent') : t('onboarding.sendInvite')}
                 </button>
               </div>
             </div>

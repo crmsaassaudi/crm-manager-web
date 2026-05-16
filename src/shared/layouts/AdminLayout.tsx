@@ -48,9 +48,9 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: t('common.dashboard'), path: '/' },
     { id: 'tenants', icon: Users, label: t('common.tenants'), path: '/tenants' },
-    { id: 'onboarding', icon: Zap, label: 'Onboarding', path: '/onboarding' },
-    { id: 'permission-groups', icon: ShieldIcon, label: 'Permission Groups', path: '/permission-groups' },
-    { id: 'users', icon: User, label: 'Manager Users', path: '/users' },
+    { id: 'onboarding', icon: Zap, label: t('common.onboarding'), path: '/onboarding' },
+    { id: 'permission-groups', icon: ShieldIcon, label: t('common.permissionGroups'), path: '/permission-groups' },
+    { id: 'users', icon: User, label: t('common.managerUsers'), path: '/users' },
     { id: 'settings', icon: Settings, label: t('common.settings'), path: '/settings' },
   ];
 
