@@ -5,6 +5,9 @@ import AdminLayout from './shared/layouts/AdminLayout';
 import DashboardPage from './pages/DashboardPage';
 import TenantsPage from './pages/TenantsPage';
 import TenantDetailPage from './pages/TenantDetailPage';
+import PermissionGroupsPage from './pages/PermissionGroupsPage';
+import ManagerUsersPage from './pages/ManagerUsersPage';
+import CustomerOnboardingPage from './pages/CustomerOnboardingPage';
 import { Shield, Check, X, ArrowRight, Zap, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -175,6 +178,9 @@ const App = () => {
           <Route path="/" element={<DashboardPage />} />
           <Route path="/tenants" element={<TenantsPage />} />
           <Route path="/tenants/:id" element={<TenantDetailPage />} />
+          <Route path="/permission-groups" element={<PermissionGroupsPage />} />
+          <Route path="/users" element={<ManagerUsersPage />} />
+          <Route path="/onboarding" element={<CustomerOnboardingPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AdminLayout>

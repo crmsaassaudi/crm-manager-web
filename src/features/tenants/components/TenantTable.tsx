@@ -12,13 +12,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface Tenant {
   id: string;
-  _id: string;
+  _id?: string;
   name: string;
   alias: string;
   status: string;
   subscriptionPlan: string;
-  availablePermissions: string[] | null;
-  createdAt: string;
+  availablePermissions?: string[] | null;
+  createdAt?: string;
 }
 
 interface TenantTableProps {
@@ -197,7 +197,9 @@ const TenantTable: React.FC<TenantTableProps> = ({ tenants, onBulkAction }) => {
                       {tenant.availablePermissions?.length || 0} {t('tenants.table.permsGranted')}
                     </td>
                     <td className="px-4 py-3 text-[11px] font-medium text-slate-400">
-                      {new Date(tenant.createdAt).toLocaleDateString('vi-VN')}
+                      {tenant.createdAt
+                        ? new Date(tenant.createdAt).toLocaleDateString('vi-VN')
+                        : '-'}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <button className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 opacity-0 group-hover:opacity-100 transition-all">

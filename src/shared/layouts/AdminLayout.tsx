@@ -15,7 +15,8 @@ import {
   LogOut,
   User,
   ChevronDown,
-  Check
+  Check,
+  Shield as ShieldIcon
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -47,6 +48,9 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: t('common.dashboard'), path: '/' },
     { id: 'tenants', icon: Users, label: t('common.tenants'), path: '/tenants' },
+    { id: 'onboarding', icon: Zap, label: 'Onboarding', path: '/onboarding' },
+    { id: 'permission-groups', icon: ShieldIcon, label: 'Permission Groups', path: '/permission-groups' },
+    { id: 'users', icon: User, label: 'Manager Users', path: '/users' },
     { id: 'settings', icon: Settings, label: t('common.settings'), path: '/settings' },
   ];
 
@@ -214,7 +218,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                         {t('layout.profile')}
                       </button>
                       <button className="w-full flex items-center gap-2.5 px-2.5 py-2 text-[13px] text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-colors">
-                        <Shield size={16} className="text-slate-400" />
+                        <ShieldIcon size={16} className="text-slate-400" />
                         {t('layout.security')}
                       </button>
                       <div className="h-px bg-slate-100 dark:bg-slate-800 my-1 mx-2"></div>
@@ -240,9 +244,5 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     </div>
   );
 };
-
-const Shield = ({ size, className }: { size: number; className?: string }) => (
-  <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
-);
 
 export default AdminLayout;

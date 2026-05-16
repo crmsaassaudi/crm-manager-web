@@ -25,17 +25,24 @@ const TenantDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [localGranted, setLocalGranted] = useState<Set<string>>(new Set());
+  const [localDisabledCore, setLocalDisabledCore] = useState<Set<string>>(
+    new Set(),
+  );
+  const [permissionGroups, setPermissionGroups] = useState<api.PermissionGroup[]>([]);
 
   const loadData = useCallback(async () => {
     if (!id) return;
     try {
-      const [tData, pData] = await Promise.all([
+      const [tData, pData, groupsData] = await Promise.all([
         api.fetchTenantById(id),
         api.fetchFeaturePermissions(id),
+        api.fetchPermissionGroups(),
       ]);
       setTenant(tData);
       setPermData(pData);
+      setPermissionGroups(groupsData);
       setLocalGranted(new Set(pData.grantedFeaturePermissions));
+      setLocalDisabledCore(new Set(pData.disabledCorePermissions || []));
     } catch (err) {
       console.error(err);
     } finally {
@@ -78,10 +85,41 @@ const TenantDetailPage = () => {
     if (!id) return;
     setSaving(true);
     try {
-      const result = await api.setFeaturePermissions(id, perms);
+      const allowed = new Set<string>(permData?.featurePermissions || []);
+      const featurePerms = perms.filter((perm) => allowed.has(perm));
+      const result = await api.setFeaturePermissions(id, featurePerms);
       setLocalGranted(new Set(result.grantedFeaturePermissions));
     } catch (err) {
       console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleToggleCore = async (perm: string, checked: boolean) => {
+    if (!id || !permData?.corePermissions) return;
+    setSaving(true);
+    setLocalDisabledCore(prev => {
+      const next = new Set(prev);
+      if (checked) next.delete(perm);
+      else next.add(perm);
+      return next;
+    });
+
+    try {
+      const enabledCore = permData.corePermissions.filter((corePerm: string) =>
+        corePerm === perm ? checked : !localDisabledCore.has(corePerm),
+      );
+      const result = await api.setCorePermissions(id, enabledCore);
+      setLocalDisabledCore(new Set(result.disabledCorePermissions || []));
+    } catch (err) {
+      console.error(err);
+      setLocalDisabledCore(prev => {
+        const next = new Set(prev);
+        if (checked) next.add(perm);
+        else next.delete(perm);
+        return next;
+      });
     } finally {
       setSaving(false);
     }
@@ -120,7 +158,7 @@ const TenantDetailPage = () => {
               <div className="flex flex-wrap items-center gap-4 text-[13px] text-slate-500 font-medium">
                 <span className="flex items-center gap-1.5"><Globe size={14} className="text-slate-400" /> {tenant.alias}</span>
                 <span className="flex items-center gap-1.5"><Crown size={14} className="text-slate-400" /> {tenant.subscriptionPlan}</span>
-                <span className="flex items-center gap-1.5"><HardDrive size={14} className="text-slate-400" /> {tenant.storageQuota.usedMB}/{tenant.storageQuota.limitMB} MB</span>
+                <span className="flex items-center gap-1.5"><HardDrive size={14} className="text-slate-400" /> {tenant.storageQuota?.usedMB || 0}/{tenant.storageQuota?.limitMB || 0} MB</span>
               </div>
             </div>
           </div>
@@ -156,7 +194,10 @@ const TenantDetailPage = () => {
           corePermissions={permData?.corePermissions || []}
           featurePermissions={permData?.featurePermissions || []}
           grantedPermissions={localGranted}
+          disabledCorePermissions={localDisabledCore}
+          permissionGroups={permissionGroups}
           onToggle={handleToggle}
+          onToggleCore={handleToggleCore}
           onGrantAll={() => handleApplyTemplate(permData?.featurePermissions || [])}
           onRevokeAll={() => handleApplyTemplate([])}
           onApplyTemplate={handleApplyTemplate}

@@ -17,24 +17,29 @@ interface PermissionManagerProps {
   corePermissions: string[];
   featurePermissions: string[];
   grantedPermissions: Set<string>;
+  disabledCorePermissions: Set<string>;
+  permissionGroups?: Array<{
+    id: string;
+    name: string;
+    description?: string;
+    permissions: string[];
+  }>;
   onToggle: (perm: string, checked: boolean) => void;
+  onToggleCore: (perm: string, checked: boolean) => void;
   onGrantAll: () => void;
   onRevokeAll: () => void;
   onApplyTemplate: (perms: string[]) => void;
   isSaving: boolean;
 }
 
-const TEMPLATES = [
-  { name: 'SILVER', perms: ['leads:read', 'contacts:read', 'accounts:read', 'deals:read'] },
-  { name: 'GOLD', perms: ['leads:*', 'contacts:*', 'accounts:*', 'deals:read', 'reports:read'] },
-  { name: 'PLATINUM', perms: ['leads:*', 'contacts:*', 'accounts:*', 'deals:*', 'reports:*', 'campaigns:*', 'tickets:*'] },
-];
-
 const PermissionManager: React.FC<PermissionManagerProps> = ({
   corePermissions,
   featurePermissions,
   grantedPermissions,
+  disabledCorePermissions,
+  permissionGroups = [],
   onToggle,
+  onToggleCore,
   onGrantAll,
   onRevokeAll,
   onApplyTemplate,
@@ -135,19 +140,25 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
         <div className="bg-slate-50 dark:bg-slate-800/20 border border-slate-100 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
           <div className="flex items-center gap-2 text-slate-500 mb-3">
             <Layers size={16} />
-            <span className="text-[11px] font-bold uppercase tracking-widest">{t('permissions.quickTemplates')}</span>
+              <span className="text-[11px] font-bold uppercase tracking-widest">{t('permissions.quickTemplates')}</span>
           </div>
           <div className="flex gap-2.5">
-            {TEMPLATES.map(template => (
+            {permissionGroups.map(template => (
               <button
-                key={template.name}
-                onClick={() => onApplyTemplate(template.perms)}
+                key={template.id}
+                onClick={() => onApplyTemplate(template.permissions)}
                 disabled={isSaving}
                 className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-[12px] font-bold tracking-tight transition-all shadow-sm uppercase"
+                title={template.description}
               >
                 {template.name}
               </button>
             ))}
+            {permissionGroups.length === 0 && (
+              <span className="text-[12px] font-semibold text-slate-400">
+                No permission groups yet
+              </span>
+            )}
           </div>
         </div>
       )}
@@ -156,7 +167,10 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
       <div className="space-y-3">
         {Object.entries(currentGroups).map(([resource, perms]) => {
           const isExpanded = expandedGroups.has(resource) || search.length > 0;
-          const activeCount = perms.filter(p => grantedPermissions.has(p)).length;
+          const activeCount =
+            activeTab === 'core'
+              ? perms.filter(p => !disabledCorePermissions.has(p)).length
+              : perms.filter(p => grantedPermissions.has(p)).length;
           
           return (
             <div key={resource} className="bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm transition-all hover:border-slate-300 dark:hover:border-slate-700">
@@ -191,7 +205,10 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
                   >
                     <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {perms.map(perm => {
-                        const isGranted = grantedPermissions.has(perm) || activeTab === 'core';
+                        const isGranted =
+                          activeTab === 'core'
+                            ? !disabledCorePermissions.has(perm)
+                            : grantedPermissions.has(perm);
                         return (
                           <div 
                             key={perm}
@@ -210,9 +227,14 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
                                 {isGranted ? <Check size={14} /> : <div className="w-1.5 h-1.5 rounded-full bg-current" />}
                               </button>
                             ) : (
-                              <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                                <Check size={14} />
-                              </div>
+                              <button 
+                                onClick={() => onToggleCore(perm, !isGranted)}
+                                disabled={isSaving}
+                                className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all shadow-md ${isGranted ? 'bg-emerald-500 text-white shadow-emerald-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
+                                title={isGranted ? 'Disable core permission' : 'Enable core permission'}
+                              >
+                                {isGranted ? <Check size={14} /> : <div className="w-1.5 h-1.5 rounded-full bg-current" />}
+                              </button>
                             )}
                           </div>
                         );

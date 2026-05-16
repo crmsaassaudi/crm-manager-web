@@ -27,6 +27,52 @@ api.interceptors.response.use(
   },
 );
 
+export type Tenant = {
+  id: string;
+  _id?: string;
+  name: string;
+  alias: string;
+  status: string;
+  subscriptionPlan: string;
+  availablePermissions?: string[] | null;
+  disabledCorePermissions?: string[] | null;
+  createdAt?: string;
+  storageQuota?: { usedMB: number; limitMB: number };
+};
+
+export type PermissionGroup = {
+  id: string;
+  name: string;
+  description?: string;
+  permissions: string[];
+  isSystem?: boolean;
+};
+
+export type ManagerUser = {
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  keycloakId?: string;
+  platformRole?: string;
+  status?: string;
+  createdAt?: string;
+  inviteSent?: boolean;
+  inviteError?: string;
+  temporaryPassword?: string;
+};
+
+export type ProvisioningStatus = {
+  status: 'QUEUED' | 'PROVISIONING' | 'READY' | 'FAILED';
+  currentStep: number;
+  totalSteps: number;
+  stepLabel: string;
+  tenantId?: string;
+  redirectUrl?: string;
+  error?: string;
+  retryable?: boolean;
+};
+
 export const getStoredAccessToken = () =>
   localStorage.getItem(TOKEN_STORAGE_KEY);
 
@@ -36,12 +82,11 @@ export const clearStoredAccessToken = () => {
 
 export const fetchCurrentUser = () => api.get('/auth/me').then((r) => r.data);
 
-// ─── Tenants ───
-
-export const fetchTenants = () => api.get('/tenants').then((r) => r.data);
+export const fetchTenants = () =>
+  api.get<Tenant[]>('/tenants').then((r) => r.data);
 
 export const fetchTenantById = (id: string) =>
-  api.get(`/tenants/${id}`).then((r) => r.data);
+  api.get<Tenant>(`/tenants/${id}`).then((r) => r.data);
 
 export const createTenant = (data: {
   name: string;
@@ -56,8 +101,6 @@ export const updateTenantSubscription = (
   id: string,
   data: { subscriptionPlan?: string; storageQuotaLimitMB?: number },
 ) => api.patch(`/tenants/${id}/subscription`, data).then((r) => r.data);
-
-// ─── Feature Permissions ───
 
 export const fetchFeaturePermissions = (tenantId: string) =>
   api.get(`/tenants/${tenantId}/feature-permissions`).then((r) => r.data);
@@ -88,7 +131,74 @@ export const setFeaturePermissions = (
     .put(`/tenants/${tenantId}/feature-permissions`, { permissions })
     .then((r) => r.data);
 
-// ─── Analytics ───
+export const setCorePermissions = (tenantId: string, permissions: string[]) =>
+  api
+    .put(`/tenants/${tenantId}/core-permissions`, { permissions })
+    .then((r) => r.data);
+
+export const fetchPermissionCatalog = () =>
+  api.get('/permission-groups/catalog').then((r) => r.data);
+
+export const fetchPermissionGroups = () =>
+  api.get<PermissionGroup[]>('/permission-groups').then((r) => r.data);
+
+export const createPermissionGroup = (data: {
+  name: string;
+  description?: string;
+  permissions: string[];
+}) => api.post('/permission-groups', data).then((r) => r.data);
+
+export const updatePermissionGroup = (
+  id: string,
+  data: { name?: string; description?: string; permissions?: string[] },
+) => api.patch(`/permission-groups/${id}`, data).then((r) => r.data);
+
+export const deletePermissionGroup = (id: string) =>
+  api.delete(`/permission-groups/${id}`).then((r) => r.data);
+
+export const applyPermissionGroupToTenants = (
+  id: string,
+  data: { tenantIds: string[]; mode?: 'replace' | 'merge' },
+) =>
+  api
+    .post(`/permission-groups/${id}/apply-to-tenants`, data)
+    .then((r) => r.data);
+
+export const fetchManagerUsers = () =>
+  api.get<ManagerUser[]>('/users').then((r) => r.data);
+
+export const createManagerUser = (data: {
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  temporaryPassword?: string;
+  sendInvite?: boolean;
+}) => api.post('/users', data).then((r) => r.data);
+
+export const updateManagerUser = (
+  id: string,
+  data: { status?: 'ACTIVE' | 'INACTIVE' },
+) => api.patch(`/users/${id}`, data).then((r) => r.data);
+
+export const provisionCustomer = (data: {
+  companyName: string;
+  adminEmail: string;
+  adminFullName: string;
+  plan: 'FREE' | 'PRO' | 'ENTERPRISE';
+}) => api.post('/onboarding/provision', data).then((r) => r.data);
+
+export const fetchProvisioningStatus = (provisioningId: string) =>
+  api
+    .get<ProvisioningStatus>(`/onboarding/status/${provisioningId}`)
+    .then((r) => r.data);
+
+export const inviteCustomerUser = (
+  tenantId: string,
+  data: { email: string; role: 'OWNER' | 'ADMIN' | 'MEMBER' },
+) =>
+  api
+    .post(`/onboarding/tenants/${tenantId}/invite`, data)
+    .then((r) => r.data);
 
 export const fetchDashboardStats = () =>
   api.get('/analytics/dashboard').then((r) => r.data);
