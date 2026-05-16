@@ -56,105 +56,95 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-background transition-colors duration-300">
+    <div className="flex min-h-screen bg-[#F8FAFC] dark:bg-[#020617] transition-colors duration-300">
       {/* Sidebar */}
       <motion.aside 
         initial={false}
-        animate={{ width: isSidebarCollapsed ? 72 : 240 }}
-        className="fixed inset-y-0 left-0 z-50 flex flex-col bg-card border-r border-border shadow-sm"
+        animate={{ width: isSidebarCollapsed ? 64 : 220 }}
+        className="fixed inset-y-0 left-0 z-50 flex flex-col bg-white dark:bg-[#0F172A] border-r border-slate-200 dark:border-slate-800 shadow-sm"
       >
-        <div className="p-4 h-16 flex items-center justify-between border-b border-border/50">
-          {!isSidebarCollapsed && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex items-center gap-2 font-bold text-lg text-primary tracking-tight"
-            >
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/20">
-                <Zap size={18} fill="currentColor" />
-              </div>
-              <span>CRM Admin</span>
-            </motion.div>
-          )}
-          {isSidebarCollapsed && (
-             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground mx-auto shadow-lg shadow-primary/20">
-                <Zap size={18} fill="currentColor" />
-             </div>
-          )}
+        <div className="h-14 flex items-center px-4 border-b border-slate-100 dark:border-slate-800/50">
+          <div className={`flex items-center gap-2 ${isSidebarCollapsed ? 'mx-auto' : ''}`}>
+            <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-white shadow-sm shadow-primary/20">
+              <Zap size={16} fill="currentColor" />
+            </div>
+            {!isSidebarCollapsed && (
+              <span className="font-black text-sm tracking-tighter text-slate-900 dark:text-white uppercase">CRM Admin</span>
+            )}
+          </div>
         </div>
 
-        <nav className="flex-1 px-3 space-y-1 mt-4">
+        <nav className="flex-1 px-2 space-y-0.5 mt-3">
           {navItems.map((item) => (
             <NavLink
               key={item.id}
               to={item.path}
               className={({ isActive }) => `
-                flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group
+                flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all duration-200 group relative
                 ${isActive 
-                  ? 'bg-primary/10 text-primary font-bold' 
-                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'}
+                  ? 'bg-primary/5 text-primary' 
+                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200'}
               `}
             >
-              <item.icon size={18} className="group-hover:scale-110 transition-transform" />
+              <item.icon size={16} className={`transition-transform duration-200 ${isSidebarCollapsed ? 'mx-auto' : ''}`} />
               {!isSidebarCollapsed && (
-                <motion.span 
-                  initial={{ opacity: 0, x: -5 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="text-sm"
-                >
-                  {item.label}
-                </motion.span>
+                <span className="text-[13px] font-semibold tracking-tight">{item.label}</span>
               )}
+              {/* Active Indicator */}
+              <NavLink 
+                to={item.path} 
+                className={({ isActive }) => isActive && !isSidebarCollapsed ? "absolute left-0 w-1 h-4 bg-primary rounded-r-full" : "hidden"} 
+              />
             </NavLink>
           ))}
         </nav>
 
-        <div className="p-3 border-t border-border">
+        <div className="p-2 border-t border-slate-100 dark:border-slate-800/50">
           <button 
             onClick={() => setSidebarCollapsed(!isSidebarCollapsed)}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-all text-sm"
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all"
           >
-            <ChevronLeft size={18} className={`transition-transform duration-300 ${isSidebarCollapsed ? 'rotate-180' : ''}`} />
-            {!isSidebarCollapsed && <span className="font-medium">Collapse</span>}
+            <ChevronLeft size={16} className={`transition-transform duration-300 ${isSidebarCollapsed ? 'rotate-180 mx-auto' : ''}`} />
+            {!isSidebarCollapsed && <span className="text-[12px] font-bold uppercase tracking-wider">Collapse</span>}
           </button>
         </div>
       </motion.aside>
 
       {/* Main Content */}
       <main 
-        className={`flex-1 transition-all duration-300 ${isSidebarCollapsed ? 'pl-[72px]' : 'pl-[240px]'}`}
+        className={`flex-1 transition-all duration-300 ${isSidebarCollapsed ? 'pl-16' : 'pl-[220px]'}`}
       >
         {/* Header */}
-        <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border h-16 flex items-center px-6 justify-between">
-          <div className="flex items-center gap-4 text-muted-foreground">
+        <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#0F172A]/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 h-14 flex items-center px-6 justify-between shadow-sm shadow-slate-200/20 dark:shadow-none">
+          <div className="flex items-center gap-4">
              <div className="relative group">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 group-focus-within:text-primary transition-colors" />
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
                 <input 
                   type="text" 
-                  placeholder={t('common.search')} 
-                  className="bg-accent/50 border-none rounded-xl pl-9 pr-4 py-1.5 text-xs w-56 focus:ring-2 focus:ring-primary/20 outline-none transition-all focus:w-72"
+                  placeholder="Search anything..." 
+                  className="bg-slate-100 dark:bg-slate-800/50 border-none rounded-lg pl-9 pr-4 py-1.5 text-[12px] w-48 focus:ring-1 focus:ring-primary/30 outline-none transition-all focus:w-64"
                 />
              </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {/* Language Dropdown */}
             <div className="relative" ref={langRef}>
               <button 
                 onClick={() => setIsLangOpen(!isLangOpen)}
-                className="p-2 rounded-lg hover:bg-accent text-muted-foreground transition-colors flex items-center gap-2"
+                className="h-8 px-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors flex items-center gap-2 border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
               >
-                <Globe size={18} />
-                <span className="text-xs font-bold">{i18n.language.toUpperCase()}</span>
-                <ChevronDown size={14} className={`transition-transform ${isLangOpen ? 'rotate-180' : ''}`} />
+                <Globe size={16} />
+                <span className="text-[11px] font-black">{i18n.language.toUpperCase()}</span>
+                <ChevronDown size={12} className={`transition-transform duration-200 ${isLangOpen ? 'rotate-180' : ''}`} />
               </button>
               <AnimatePresence>
                 {isLangOpen && (
                   <motion.div 
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    initial={{ opacity: 0, y: 8, scale: 0.98 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 mt-2 w-48 bg-card border border-border rounded-xl shadow-xl py-1 z-50 overflow-hidden"
+                    exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                    className="absolute right-0 mt-1.5 w-40 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 z-50"
                   >
                     {languages.map((lang) => (
                       <button
@@ -163,13 +153,13 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                           i18n.changeLanguage(lang.code);
                           setIsLangOpen(false);
                         }}
-                        className={`w-full flex items-center justify-between px-4 py-2.5 text-sm hover:bg-accent transition-colors ${i18n.language === lang.code ? 'text-primary font-bold bg-primary/5' : 'text-muted-foreground'}`}
+                        className={`w-full flex items-center justify-between px-3 py-2 text-[12px] hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${i18n.language === lang.code ? 'text-primary font-bold' : 'text-slate-600 dark:text-slate-300'}`}
                       >
-                        <div className="flex items-center gap-3">
-                          <span>{lang.flag}</span>
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-sm">{lang.flag}</span>
                           <span>{lang.label}</span>
                         </div>
-                        {i18n.language === lang.code && <Check size={14} />}
+                        {i18n.language === lang.code && <Check size={12} />}
                       </button>
                     ))}
                   </motion.div>
@@ -179,65 +169,68 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
             <button 
               onClick={toggleTheme}
-              className="p-2 rounded-lg hover:bg-accent text-muted-foreground transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
             >
-              {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+              {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
             </button>
 
-            <button className="p-2 rounded-lg hover:bg-accent text-muted-foreground transition-colors relative">
-              <Bell size={18} />
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-destructive rounded-full border border-background"></span>
+            <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors relative border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
+              <Bell size={16} />
+              <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-rose-500 rounded-full border border-white dark:border-[#0F172A]"></span>
             </button>
 
-            <div className="h-6 w-px bg-border mx-2"></div>
+            <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1.5"></div>
 
             {/* User Dropdown */}
             <div className="relative" ref={userRef}>
               <button 
                 onClick={() => setIsUserOpen(!isUserOpen)}
-                className="flex items-center gap-3 p-1 pl-3 rounded-xl hover:bg-accent transition-colors"
+                className="flex items-center gap-2.5 p-1 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
               >
-                <div className="text-right hidden sm:block">
-                  <p className="text-xs font-bold leading-none">Admin User</p>
-                  <p className="text-[10px] text-muted-foreground font-medium mt-1">Platform Manager</p>
-                </div>
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-indigo-400 border border-border shadow-sm overflow-hidden">
+                <div className="w-7 h-7 rounded-lg bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 overflow-hidden shadow-sm">
                   <img 
                     src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" 
                     alt="Avatar" 
                     className="w-full h-full object-cover"
                   />
                 </div>
+                <div className="text-left hidden sm:block">
+                  <p className="text-[11px] font-black leading-none text-slate-900 dark:text-white">Admin User</p>
+                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter mt-0.5">Manager</p>
+                </div>
+                <ChevronDown size={12} className={`text-slate-400 transition-transform duration-200 ${isUserOpen ? 'rotate-180' : ''}`} />
               </button>
               
               <AnimatePresence>
                 {isUserOpen && (
                   <motion.div 
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    initial={{ opacity: 0, y: 8, scale: 0.98 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-xl shadow-xl py-1 z-50 overflow-hidden"
+                    exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                    className="absolute right-0 mt-1.5 w-52 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 z-50 overflow-hidden"
                   >
-                    <div className="px-4 py-3 border-b border-border bg-accent/30">
-                       <p className="text-xs font-bold">Logged in as</p>
-                       <p className="text-xs text-muted-foreground truncate">admin@crm-manager.io</p>
+                    <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Logged in as</p>
+                       <p className="text-[12px] font-bold text-slate-900 dark:text-slate-100 truncate">admin@crm-manager.io</p>
                     </div>
-                    <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-muted-foreground hover:bg-accent transition-colors">
-                      <User size={16} />
-                      Profile Settings
-                    </button>
-                    <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-muted-foreground hover:bg-accent transition-colors">
-                      <Shield size={16} />
-                      Security
-                    </button>
-                    <div className="h-px bg-border my-1"></div>
-                    <button 
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-rose-500 hover:bg-rose-500/10 transition-colors font-bold"
-                    >
-                      <LogOut size={16} />
-                      Log out
-                    </button>
+                    <div className="p-1 space-y-0.5">
+                      <button className="w-full flex items-center gap-2.5 px-2.5 py-2 text-[12px] text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-colors">
+                        <User size={14} className="text-slate-400" />
+                        Profile Settings
+                      </button>
+                      <button className="w-full flex items-center gap-2.5 px-2.5 py-2 text-[12px] text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-colors">
+                        <Shield size={14} className="text-slate-400" />
+                        Security
+                      </button>
+                      <div className="h-px bg-slate-100 dark:bg-slate-800 my-1 mx-2"></div>
+                      <button 
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2.5 px-2.5 py-2 text-[12px] text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors font-bold"
+                      >
+                        <LogOut size={14} />
+                        Log out
+                      </button>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -245,7 +238,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
         </header>
 
-        <div className="p-6 max-w-[1400px] mx-auto">
+        <div className="p-5 max-w-[1400px] mx-auto">
           {children}
         </div>
       </main>

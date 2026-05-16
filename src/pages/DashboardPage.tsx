@@ -4,9 +4,7 @@ import {
   Users, 
   Building2, 
   HardDrive, 
-  Activity, 
-  ArrowUpRight,
-  ArrowDownRight
+  Activity
 } from 'lucide-react';
 import * as api from '../api';
 import { motion } from 'framer-motion';
@@ -30,7 +28,8 @@ const DashboardPage = () => {
       icon: Building2, 
       trend: '+12%', 
       isUp: true,
-      color: 'bg-blue-500'
+      color: 'text-blue-600 dark:text-blue-400',
+      bg: 'bg-blue-50 dark:bg-blue-900/20'
     },
     { 
       label: t('dashboard.activeUsers'), 
@@ -38,7 +37,8 @@ const DashboardPage = () => {
       icon: Users, 
       trend: '+5.4%', 
       isUp: true,
-      color: 'bg-emerald-500'
+      color: 'text-emerald-600 dark:text-emerald-400',
+      bg: 'bg-emerald-50 dark:bg-emerald-900/20'
     },
     { 
       label: t('dashboard.storageUsage'), 
@@ -46,7 +46,8 @@ const DashboardPage = () => {
       icon: HardDrive, 
       trend: '+2.1%', 
       isUp: false,
-      color: 'bg-amber-500'
+      color: 'text-amber-600 dark:text-amber-400',
+      bg: 'bg-amber-50 dark:bg-amber-900/20'
     },
     { 
       label: 'System Health', 
@@ -54,17 +55,22 @@ const DashboardPage = () => {
       icon: Activity, 
       trend: 'Optimal', 
       isUp: true,
-      color: 'bg-purple-500'
+      color: 'text-indigo-600 dark:text-indigo-400',
+      bg: 'bg-indigo-50 dark:bg-indigo-900/20'
     },
   ];
 
-  if (loading) return <div className="h-64 flex items-center justify-center"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div></div>;
+  if (loading) return (
+    <div className="h-64 flex items-center justify-center">
+      <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight mb-1">{t('dashboard.title')}</h1>
-        <p className="text-xs text-muted-foreground">{t('dashboard.subtitle')}</p>
+        <h1 className="text-xl font-black tracking-tight text-slate-900 dark:text-white uppercase">{t('dashboard.title')}</h1>
+        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{t('dashboard.subtitle')}</p>
       </div>
 
       {/* Metrics Grid */}
@@ -75,35 +81,33 @@ const DashboardPage = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className="bg-card p-4 rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group"
+            className="bg-white dark:bg-[#0F172A] p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm"
           >
-            <div className={`absolute top-0 right-0 w-16 h-16 ${m.color} opacity-[0.03] -mr-4 -mt-4 rounded-full group-hover:scale-110 transition-transform`}></div>
             <div className="flex items-center justify-between mb-3">
-              <div className={`p-2 rounded-lg ${m.color.replace('bg-', 'bg-')}/10 ${m.color.replace('bg-', 'text-')}`}>
-                <m.icon size={18} />
+              <div className={`p-2 rounded-lg ${m.bg} ${m.color}`}>
+                <m.icon size={16} />
               </div>
-              <div className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${m.isUp ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'}`}>
-                {m.isUp ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
+              <div className={`flex items-center gap-0.5 text-[10px] font-black px-1.5 py-0.5 rounded-full ${m.isUp ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400'}`}>
                 {m.trend}
               </div>
             </div>
             <div>
-              <p className="text-[11px] font-medium text-muted-foreground mb-0.5">{m.label}</p>
-              <h3 className="text-xl font-bold tracking-tight">{m.value}</h3>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">{m.label}</p>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">{m.value}</h3>
             </div>
           </motion.div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Storage Monitor */}
-        <div className="lg:col-span-2 bg-card rounded-xl border border-border p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-base flex items-center gap-2">
-              <HardDrive size={16} className="text-primary" />
-              Top Storage Consumers
+        <div className="lg:col-span-2 bg-white dark:bg-[#0F172A] rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+              <HardDrive size={14} className="text-primary" />
+              TOP STORAGE CONSUMERS
             </h3>
-            <button className="text-[11px] font-bold text-primary hover:underline">View All</button>
+            <button className="text-[10px] font-black text-primary hover:bg-primary/5 px-2 py-1 rounded transition-colors uppercase">View All</button>
           </div>
           <div className="space-y-4">
              {[
@@ -113,11 +117,11 @@ const DashboardPage = () => {
                { name: 'Enterprise Ltd', used: 18.9, limit: 20, color: 'bg-rose-500' },
              ].map(tenant => (
                <div key={tenant.name} className="space-y-1.5">
-                 <div className="flex justify-between text-xs">
-                   <span className="font-semibold">{tenant.name}</span>
-                   <span className="text-muted-foreground text-[11px]">{tenant.used} GB / {tenant.limit} GB</span>
+                 <div className="flex justify-between text-[11px] font-bold">
+                   <span className="text-slate-700 dark:text-slate-300 uppercase tracking-tight">{tenant.name}</span>
+                   <span className="text-slate-400">{tenant.used} GB / {tenant.limit} GB</span>
                  </div>
-                 <div className="h-1.5 w-full bg-accent rounded-full overflow-hidden">
+                 <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                    <motion.div 
                      initial={{ width: 0 }}
                      animate={{ width: `${(tenant.used / tenant.limit) * 100}%` }}
@@ -131,11 +135,11 @@ const DashboardPage = () => {
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-card rounded-xl border border-border p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-base flex items-center gap-2">
-              <Activity size={16} className="text-primary" />
-              Audit Log
+        <div className="bg-white dark:bg-[#0F172A] rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+              <Activity size={14} className="text-primary" />
+              AUDIT LOG
             </h3>
           </div>
           <div className="space-y-4">
@@ -147,18 +151,18 @@ const DashboardPage = () => {
               { type: 'revoke', user: 'admin', target: 'Acme Corp', time: '4h ago' },
             ].map((item, i) => (
               <div key={i} className="flex gap-3">
-                <div className={`w-6 h-6 rounded-lg flex-shrink-0 flex items-center justify-center ${
-                  item.type === 'grant' ? 'bg-emerald-100 text-emerald-600' :
-                  item.type === 'suspend' ? 'bg-rose-100 text-rose-600' :
-                  'bg-blue-100 text-blue-600'
+                <div className={`w-5 h-5 rounded-md flex-shrink-0 flex items-center justify-center ${
+                  item.type === 'grant' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' :
+                  item.type === 'suspend' ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400' :
+                  'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
                 }`}>
                   <div className="w-1.5 h-1.5 rounded-full bg-current"></div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[11px] leading-tight">
-                    <span className="font-bold text-foreground">@{item.user}</span> {item.type === 'grant' ? 'granted' : item.type === 'suspend' ? 'suspended' : 'action on'} <span className="font-bold text-foreground">{item.target}</span>
+                  <p className="text-[11px] leading-snug text-slate-600 dark:text-slate-400 font-medium">
+                    <span className="font-black text-slate-900 dark:text-slate-200">@{item.user}</span> {item.type === 'grant' ? 'granted' : item.type === 'suspend' ? 'suspended' : 'action on'} <span className="font-black text-slate-900 dark:text-slate-200">{item.target}</span>
                   </p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">{item.time}</p>
+                  <p className="text-[9px] text-slate-400 font-bold uppercase mt-0.5">{item.time}</p>
                 </div>
               </div>
             ))}
