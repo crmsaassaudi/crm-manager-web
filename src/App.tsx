@@ -173,7 +173,7 @@ const App = () => {
 
   return (
     <BrowserRouter>
-      <AdminLayout>
+      <AdminLayout user={user}>
         <Routes>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/tenants" element={<TenantsPage />} />

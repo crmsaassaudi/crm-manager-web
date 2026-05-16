@@ -22,7 +22,17 @@ import { NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as api from '../../api';
 
-const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface AuthUser {
+  sub?: string;
+  email?: string;
+  preferred_username?: string;
+  name?: string;
+}
+
+const AdminLayout: React.FC<{ children: React.ReactNode; user: AuthUser }> = ({
+  children,
+  user,
+}) => {
   const { t, i18n } = useTranslation();
   const { theme, toggleTheme } = useTheme();
   const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -41,8 +51,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }, []);
 
   const handleLogout = () => {
-    api.clearStoredAccessToken();
-    window.location.reload();
+    window.location.href = '/api/auth/logout';
   };
 
   const navItems = [
@@ -187,15 +196,19 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 className="flex items-center gap-2.5 p-1 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
               >
                 <div className="w-7 h-7 rounded-lg bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                  <img 
-                    src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" 
-                    alt="Avatar" 
+                  <img
+                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email || 'Felix'}`}
+                    alt="Avatar"
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="text-left hidden sm:block">
-                  <p className="text-[12px] font-semibold leading-none text-slate-900 dark:text-white">{t('layout.adminUser')}</p>
-                  <p className="text-[10px] text-slate-400 font-medium mt-0.5">{t('layout.adminRole')}</p>
+                  <p className="text-[12px] font-semibold leading-none text-slate-900 dark:text-white">
+                    {user.name || user.preferred_username || t('layout.adminUser')}
+                  </p>
+                  <p className="text-[10px] text-slate-400 font-medium mt-0.5">
+                    {t('layout.adminRole')}
+                  </p>
                 </div>
                 <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isUserOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -209,8 +222,12 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     className="absolute right-0 mt-1.5 w-56 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 z-50 overflow-hidden"
                   >
                     <div className="px-3 py-2.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
-                       <p className="text-[11px] font-medium text-slate-500 mb-0.5">{t('layout.loginBy')}</p>
-                       <p className="text-[13px] font-semibold text-slate-900 dark:text-slate-100 truncate">admin@crm-manager.io</p>
+                      <p className="text-[11px] font-medium text-slate-500 mb-0.5">
+                        {t('layout.loginBy')}
+                      </p>
+                      <p className="text-[13px] font-semibold text-slate-900 dark:text-slate-100 truncate">
+                        {user.email}
+                      </p>
                     </div>
                     <div className="p-1 space-y-0.5">
                       <button className="w-full flex items-center gap-2.5 px-2.5 py-2 text-[13px] text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-colors">
