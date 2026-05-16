@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const TOKEN_STORAGE_KEY = 'crm-manager-access-token';
+// Cookie-based authentication via crm-manager-api proxy
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
@@ -9,19 +9,22 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem(TOKEN_STORAGE_KEY);
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
   return config;
 });
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem(TOKEN_STORAGE_KEY);
-      window.dispatchEvent(new Event('crm-manager-auth:logout'));
+  async (error) => {
+    const originalRequest = error.config;
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      try {
+        await api.get('/auth/refresh');
+        return api(originalRequest);
+      } catch (refreshError) {
+        window.dispatchEvent(new Event('crm-manager-auth:logout'));
+        return Promise.reject(refreshError);
+      }
     }
     return Promise.reject(error);
   },
@@ -73,11 +76,8 @@ export type ProvisioningStatus = {
   retryable?: boolean;
 };
 
-export const getStoredAccessToken = () =>
-  localStorage.getItem(TOKEN_STORAGE_KEY);
-
 export const clearStoredAccessToken = () => {
-  localStorage.removeItem(TOKEN_STORAGE_KEY);
+  // Cookies are cleared via /auth/logout
 };
 
 export const fetchCurrentUser = () => api.get('/auth/me').then((r) => r.data);

@@ -143,7 +143,6 @@ const App = () => {
   useEffect(() => {
     const handleLogout = () => {
       setUser(null);
-      api.clearStoredAccessToken();
     };
 
     window.addEventListener('crm-manager-auth:logout', handleLogout);
