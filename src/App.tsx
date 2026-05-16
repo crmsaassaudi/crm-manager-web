@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   BrowserRouter,
   Routes,
@@ -28,6 +28,7 @@ import {
   X,
   HardDrive,
   Crown,
+  LogOut,
 } from 'lucide-react';
 import * as api from './api';
 import './index.css';
@@ -64,7 +65,7 @@ interface Toast {
 }
 
 let toastId = 0;
-let setToastsGlobal: React.Dispatch<React.SetStateAction<Toast[]>>;
+let setToastsGlobal: React.Dispatch<React.SetStateAction<Toast[]>> | undefined;
 
 function showToast(message: string, type: ToastType = 'success') {
   const id = ++toastId;
@@ -76,7 +77,14 @@ function showToast(message: string, type: ToastType = 'success') {
 
 const ToastContainer = () => {
   const [toasts, setToasts] = useState<Toast[]>([]);
-  setToastsGlobal = setToasts;
+
+  useEffect(() => {
+    setToastsGlobal = setToasts;
+    return () => {
+      setToastsGlobal = undefined;
+    };
+  }, []);
+
   return (
     <div className="toast-container">
       {toasts.map((t) => (
@@ -138,11 +146,51 @@ const RESOURCE_ICONS: Record<string, React.ReactNode> = {
   tasks: <Check size={16} />,
 };
 
+type AuthUser = {
+  sub?: string;
+  email?: string;
+  preferred_username?: string;
+  name?: string;
+};
+
+const LoginScreen = () => {
+  const handleLogin = () => {
+    const returnTo = `${window.location.pathname}${window.location.search}`;
+    window.location.href = `/api/auth/login?returnTo=${encodeURIComponent(returnTo)}`;
+  };
+
+  return (
+    <div className="login-page">
+      <div className="login-panel">
+        <div className="login-brand">
+          <Shield size={28} />
+          <div>
+            <h1>CRM Manager</h1>
+            <p>Continue with your platform admin account.</p>
+          </div>
+        </div>
+
+        <button
+          className="btn btn-primary btn-lg login-submit"
+          onClick={handleLogin}
+          type="button"
+        >
+          Sign in
+        </button>
+      </div>
+    </div>
+  );
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Dashboard Page
 // ─────────────────────────────────────────────────────────────────────────────
 const Dashboard = () => {
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<{
+    totalTenants: number | string;
+    totalStorageUsedMB: number;
+    activeUsers: number | string;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -366,7 +414,8 @@ const TenantDetail = () => {
   }, [id]);
 
   useEffect(() => {
-    loadData();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadData();
   }, [loadData]);
 
   const handleTogglePermission = async (perm: string, checked: boolean) => {
@@ -725,6 +774,55 @@ const TenantDetail = () => {
 // App Shell
 // ─────────────────────────────────────────────────────────────────────────────
 const App = () => {
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const handleLogout = () => {
+      setUser(null);
+      api.clearStoredAccessToken();
+    };
+
+    window.addEventListener('crm-manager-auth:logout', handleLogout);
+
+    void api
+      .fetchCurrentUser()
+      .then(setUser)
+      .catch(handleLogout)
+      .finally(() => setCheckingAuth(false));
+
+    return () => {
+      window.removeEventListener('crm-manager-auth:logout', handleLogout);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    api.clearStoredAccessToken();
+    setUser(null);
+    window.location.href = '/api/auth/logout';
+  };
+
+  if (checkingAuth) {
+    return (
+      <>
+        <ToastContainer />
+        <div className="loading-container auth-loading">
+          <div className="spinner" />
+          Checking session...
+        </div>
+      </>
+    );
+  }
+
+  if (!user) {
+    return (
+      <>
+        <ToastContainer />
+        <LoginScreen />
+      </>
+    );
+  }
+
   return (
     <BrowserRouter>
       <ToastContainer />
@@ -734,6 +832,16 @@ const App = () => {
           <div className="brand">
             <Shield size={24} />
             CRM Manager
+          </div>
+
+          <div className="session-box">
+            <div>
+              <span>Signed in</span>
+              <strong>{user.email || user.preferred_username || user.name}</strong>
+            </div>
+            <button className="btn btn-ghost" onClick={handleLogout} type="button">
+              <LogOut size={16} />
+            </button>
           </div>
 
           <div>

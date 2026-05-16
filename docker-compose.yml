@@ -1,0 +1,24 @@
+services:
+  crm-manager-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: crm-manager-web
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:4201:4201"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      crm_manager_web_net:
+        ipv4_address: 172.28.0.10
+
+networks:
+  crm_manager_web_net:
+    name: crm_manager_web_net
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
+          gateway: 172.28.0.1
