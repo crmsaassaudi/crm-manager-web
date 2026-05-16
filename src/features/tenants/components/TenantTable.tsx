@@ -74,26 +74,26 @@ const TenantTable: React.FC<TenantTableProps> = ({ tenants, onBulkAction }) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#0F172A] p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3 flex-1 min-w-[320px]">
-          <div className="relative flex-1">
+          <div className="relative flex-1 max-w-sm">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input 
               type="text"
               placeholder={t('common.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-800/50 border-none rounded-lg pl-10 pr-4 py-2 text-[13px] focus:ring-1 focus:ring-primary/30 outline-none"
+              className="w-full bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-lg pl-10 pr-4 py-2 text-[13px] focus:ring-1 focus:ring-primary/30 outline-none shadow-sm"
             />
           </div>
           <select 
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-slate-50 dark:bg-slate-800/50 border-none rounded-lg px-3 py-2 text-[13px] font-semibold text-slate-700 dark:text-slate-300 focus:ring-1 focus:ring-primary/30 outline-none"
+            className="bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-[13px] font-medium text-slate-700 dark:text-slate-300 focus:ring-1 focus:ring-primary/30 outline-none shadow-sm"
           >
-            <option value="ALL">Tất cả trạng thái</option>
-            <option value="ACTIVE">Hoạt động</option>
-            <option value="SUSPENDED">Tạm khóa</option>
+            <option value="ALL">{t('common.allStatus')}</option>
+            <option value="ACTIVE">{t('common.active')}</option>
+            <option value="SUSPENDED">{t('common.suspended')}</option>
           </select>
         </div>
 
@@ -106,7 +106,7 @@ const TenantTable: React.FC<TenantTableProps> = ({ tenants, onBulkAction }) => {
                 exit={{ opacity: 0, scale: 0.98 }}
                 className="flex items-center gap-2 bg-primary/5 border border-primary/10 px-2 py-1 rounded-lg"
               >
-                <span className="text-[11px] font-bold text-primary tracking-tight uppercase">{selectedIds.size} ĐÃ CHỌN</span>
+                <span className="text-[11px] font-semibold text-primary tracking-tight">{selectedIds.size} {t('common.selected')}</span>
                 <div className="w-px h-3 bg-primary/10 mx-1"></div>
                 <button 
                   onClick={() => onBulkAction?.(Array.from(selectedIds), 'suspend')}
@@ -124,14 +124,14 @@ const TenantTable: React.FC<TenantTableProps> = ({ tenants, onBulkAction }) => {
             )}
           </AnimatePresence>
           
-          <button className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-[12px] font-bold text-slate-700 dark:text-slate-200 uppercase tracking-tight transition-colors shadow-sm">
+          <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-[13px] font-medium text-slate-700 dark:text-slate-200 transition-colors shadow-sm">
             <Download size={16} />
-            Xuất dữ liệu
+            {t('common.export')}
           </button>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-[#0F172A] rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-[#0F172A] rounded-xl border border-slate-200/60 dark:border-slate-800 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -144,11 +144,11 @@ const TenantTable: React.FC<TenantTableProps> = ({ tenants, onBulkAction }) => {
                     className="rounded border-slate-300 dark:border-slate-700 text-primary focus:ring-primary/20 h-4 w-4"
                   />
                 </th>
-                <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-widest text-slate-400">{t('tenants.table.name')}</th>
-                <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-widest text-slate-400">{t('tenants.table.plan')}</th>
-                <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-widest text-slate-400">{t('tenants.table.status')}</th>
-                <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-widest text-slate-400">Quyền hạn</th>
-                <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-widest text-slate-400">{t('tenants.table.createdAt')}</th>
+                <th className="px-4 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{t('tenants.table.name')}</th>
+                <th className="px-4 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{t('tenants.table.plan')}</th>
+                <th className="px-4 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{t('tenants.table.status')}</th>
+                <th className="px-4 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{t('tenants.table.permissions')}</th>
+                <th className="px-4 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">{t('tenants.table.createdAt')}</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
@@ -189,12 +189,12 @@ const TenantTable: React.FC<TenantTableProps> = ({ tenants, onBulkAction }) => {
                       <div className="flex items-center gap-1.5">
                         <div className={`w-1.5 h-1.5 rounded-full ${getStatusStyles(tenant.status).replace('bg-', 'bg-').split(' ')[0].replace('-50', '-500')}`}></div>
                         <span className={`text-[12px] font-semibold ${getStatusStyles(tenant.status).split(' ')[1]}`}>
-                          {tenant.status === 'ACTIVE' ? 'Hoạt động' : 'Tạm khóa'}
+                          {tenant.status === 'ACTIVE' ? t('common.active') : t('common.suspended')}
                         </span>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-[12px] font-semibold text-slate-500 dark:text-slate-400">
-                      {tenant.availablePermissions?.length || 0} quyền được cấp
+                      {tenant.availablePermissions?.length || 0} {t('tenants.table.permsGranted')}
                     </td>
                     <td className="px-4 py-3 text-[11px] font-medium text-slate-400">
                       {new Date(tenant.createdAt).toLocaleDateString('vi-VN')}
@@ -216,8 +216,8 @@ const TenantTable: React.FC<TenantTableProps> = ({ tenants, onBulkAction }) => {
             <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
               <Search size={24} />
             </div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-slate-200 mb-1">Không có kết quả</h3>
-            <p className="text-slate-400 text-[13px] font-medium">Không tìm thấy khách hàng nào khớp với bộ lọc hiện tại.</p>
+            <h3 className="text-base font-bold text-slate-900 dark:text-slate-200 mb-1">{t('common.noResults')}</h3>
+            <p className="text-slate-400 text-[13px] font-medium">{t('common.noResultsDesc')}</p>
           </div>
         )}
       </div>

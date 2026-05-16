@@ -50,7 +50,7 @@ const DashboardPage = () => {
       bg: 'bg-amber-50 dark:bg-amber-900/20'
     },
     { 
-      label: 'Sức khỏe hệ thống', 
+      label: t('dashboard.systemHealth'), 
       value: '99.9%', 
       icon: Activity, 
       trend: 'Optimal', 
@@ -105,9 +105,9 @@ const DashboardPage = () => {
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2 uppercase tracking-wide">
               <HardDrive size={18} className="text-primary" />
-              Tiêu thụ bộ nhớ hàng đầu
+              {t('dashboard.topConsumers')}
             </h3>
-            <button className="text-[12px] font-bold text-primary hover:bg-primary/5 px-3 py-1.5 rounded-lg transition-colors uppercase">Xem tất cả</button>
+            <button className="text-[12px] font-bold text-primary hover:bg-primary/5 px-3 py-1.5 rounded-lg transition-colors uppercase">{t('dashboard.viewAll')}</button>
           </div>
           <div className="space-y-5">
              {[
@@ -139,16 +139,16 @@ const DashboardPage = () => {
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2 uppercase tracking-wide">
               <Activity size={18} className="text-primary" />
-              Lịch sử hoạt động
+              {t('dashboard.recentActivity')}
             </h3>
           </div>
           <div className="space-y-5">
             {[
-              { type: 'grant', user: 'admin', target: 'Acme Corp', time: '2 phút trước' },
-              { type: 'suspend', user: 'system', target: 'Old Tenant', time: '15 phút trước' },
-              { type: 'create', user: 'admin', target: 'New Tech', time: '1 giờ trước' },
-              { type: 'login', user: 'manager_1', target: 'Security', time: '2 giờ trước' },
-              { type: 'revoke', user: 'admin', target: 'Acme Corp', time: '4 giờ trước' },
+              { type: 'grant', user: 'admin', target: 'Acme Corp', time: `2 ${t('dashboard.timeAgo')}` },
+              { type: 'suspend', user: 'system', target: 'Old Tenant', time: `15 ${t('dashboard.timeAgo')}` },
+              { type: 'create', user: 'admin', target: 'New Tech', time: `1 ${t('dashboard.timeAgo')}` },
+              { type: 'login', user: 'manager_1', target: 'Security', time: `2 ${t('dashboard.timeAgo')}` },
+              { type: 'revoke', user: 'admin', target: 'Acme Corp', time: `4 ${t('dashboard.timeAgo')}` },
             ].map((item, i) => (
               <div key={i} className="flex gap-4">
                 <div className={`w-6 h-6 rounded-lg flex-shrink-0 flex items-center justify-center ${
@@ -160,7 +160,7 @@ const DashboardPage = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[13px] leading-relaxed text-slate-600 dark:text-slate-400">
-                    <span className="font-bold text-slate-900 dark:text-slate-200">@{item.user}</span> {item.type === 'grant' ? 'đã cấp quyền' : item.type === 'suspend' ? 'đã tạm khóa' : 'thao tác trên'} <span className="font-bold text-slate-900 dark:text-slate-200">{item.target}</span>
+                    <span className="font-bold text-slate-900 dark:text-slate-200">@{item.user}</span> {item.type === 'grant' ? t('dashboard.actionGrant') : item.type === 'suspend' ? t('dashboard.actionSuspend') : t('dashboard.actionOn')} <span className="font-bold text-slate-900 dark:text-slate-200">{item.target}</span>
                   </p>
                   <p className="text-[11px] text-slate-400 font-medium mt-0.5">{item.time}</p>
                 </div>

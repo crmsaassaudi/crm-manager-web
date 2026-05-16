@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   Shield, 
   Search, 
@@ -39,6 +40,7 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
   onApplyTemplate,
   isSaving
 }) => {
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<'feature' | 'core'>('feature');
@@ -79,18 +81,18 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
     <div className="space-y-5">
       {/* Header Controls */}
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex bg-slate-100 dark:bg-slate-800/50 p-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-inner">
+        <div className="flex bg-slate-100/50 dark:bg-slate-800/30 p-1 rounded-lg">
           <button 
             onClick={() => setActiveTab('feature')}
-            className={`px-5 py-2 rounded-lg text-[13px] font-bold tracking-tight transition-all ${activeTab === 'feature' ? 'bg-white dark:bg-slate-700 text-primary shadow-md' : 'text-slate-500'}`}
+            className={`px-4 py-1.5 rounded-md text-[13px] font-medium transition-all ${activeTab === 'feature' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
           >
-            Tính năng (Features)
+            {t('permissions.features')}
           </button>
           <button 
             onClick={() => setActiveTab('core')}
-            className={`px-5 py-2 rounded-lg text-[13px] font-bold tracking-tight transition-all ${activeTab === 'core' ? 'bg-white dark:bg-slate-700 text-primary shadow-md' : 'text-slate-500'}`}
+            className={`px-4 py-1.5 rounded-md text-[13px] font-medium transition-all ${activeTab === 'core' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
           >
-            Quyền cốt lõi (Core)
+            {t('permissions.core')}
           </button>
         </div>
 
@@ -99,7 +101,7 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input 
               type="text"
-              placeholder="Tìm kiếm quyền hạn..."
+              placeholder={t('permissions.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-[13px] w-64 focus:ring-1 focus:ring-primary/30 outline-none shadow-sm"
@@ -111,7 +113,7 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
                  onClick={onRevokeAll}
                  disabled={isSaving}
                  className="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-400 transition-all shadow-sm"
-                 title="Thu hồi tất cả"
+                 title={t('permissions.revokeAll')}
                >
                  <RotateCcw size={16} />
                </button>
@@ -119,7 +121,7 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
                  onClick={onGrantAll}
                  disabled={isSaving}
                  className="w-9 h-9 flex items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 transition-all shadow-sm"
-                 title="Cấp quyền tất cả"
+                 title={t('permissions.grantAll')}
                >
                  <Zap size={16} />
                </button>
@@ -133,7 +135,7 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
         <div className="bg-slate-50 dark:bg-slate-800/20 border border-slate-100 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
           <div className="flex items-center gap-2 text-slate-500 mb-3">
             <Layers size={16} />
-            <span className="text-[11px] font-bold uppercase tracking-widest">Mẫu quyền hạn nhanh</span>
+            <span className="text-[11px] font-bold uppercase tracking-widest">{t('permissions.quickTemplates')}</span>
           </div>
           <div className="flex gap-2.5">
             {TEMPLATES.map(template => (
@@ -168,12 +170,12 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
                   </div>
                   <div className="text-left">
                     <h4 className="text-[15px] font-bold capitalize text-slate-900 dark:text-slate-100">{resource}</h4>
-                    <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider leading-none mt-1.5">{perms.length} QUYỀN HẠN</p>
+                    <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider leading-none mt-1.5">{perms.length} {t('permissions.available')}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 uppercase tracking-tighter shadow-inner">
-                    {activeCount} / {perms.length} ĐANG BẬT
+                    {activeCount} / {perms.length} {t('permissions.active')}
                   </div>
                   {isExpanded ? <ChevronUp size={18} className="text-slate-400" /> : <ChevronDown size={18} className="text-slate-400" />}
                 </div>
@@ -227,7 +229,7 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
       {isSaving && (
         <div className="fixed bottom-8 right-8 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce z-[100] border border-white/10 dark:border-slate-900/10">
           <Save size={18} className="animate-pulse" />
-          <span className="text-[12px] font-bold uppercase tracking-widest">Đang lưu thay đổi...</span>
+          <span className="text-[12px] font-bold uppercase tracking-widest">{t('permissions.saving')}</span>
         </div>
       )}
     </div>

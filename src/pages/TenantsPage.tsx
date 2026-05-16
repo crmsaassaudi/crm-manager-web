@@ -28,21 +28,21 @@ const TenantsPage = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight mb-2">{t('tenants.title')}</h1>
-          <p className="text-muted-foreground">{t('tenants.subtitle')}</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{t('tenants.title')}</h1>
+          <p className="text-[13px] text-slate-500 font-medium mt-1">{t('tenants.subtitle')}</p>
         </div>
-        <button className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-2xl font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-transform active:scale-95">
-          <Plus size={20} />
-          Provision Tenant
+        <button className="flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-semibold text-[13px] transition-colors shadow-sm">
+          <Plus size={16} />
+          {t('tenants.addTenant')}
         </button>
       </div>
 
       {loading ? (
-        <div className="h-96 flex items-center justify-center">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <div className="h-64 flex items-center justify-center">
+          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
         </div>
       ) : (
         <TenantTable tenants={tenants} onBulkAction={handleBulkAction} />

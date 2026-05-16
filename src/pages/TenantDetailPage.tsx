@@ -114,7 +114,7 @@ const TenantDetailPage = () => {
                 <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border ${
                   tenant.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600 border-emerald-500/20' : 'bg-rose-50 text-rose-600 border-rose-500/20'
                 }`}>
-                  {tenant.status === 'ACTIVE' ? 'Hoạt động' : 'Tạm khóa'}
+                  {tenant.status === 'ACTIVE' ? t('common.active') : t('common.suspended')}
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-4 text-[13px] text-slate-500 font-medium">
@@ -125,30 +125,30 @@ const TenantDetailPage = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
-            <button className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-4 py-2 rounded-lg font-bold transition-all text-[12px] uppercase tracking-tight text-slate-700 dark:text-slate-200 shadow-sm">
-              <Activity size={16} />
-              Xem Log
+          <div className="flex items-center gap-2">
+            <button className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 rounded-lg font-medium transition-all text-[13px] text-slate-700 dark:text-slate-200">
+              <Activity size={14} />
+              {t('details.viewLog')}
             </button>
-            <button className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-all text-[12px] uppercase tracking-tight shadow-sm ${
-              tenant.status === 'ACTIVE' ? 'bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100'
+            <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all text-[13px] ${
+              tenant.status === 'ACTIVE' ? 'bg-rose-50 text-rose-600 hover:bg-rose-100' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
             }`}>
-              {tenant.status === 'ACTIVE' ? <PowerOff size={16} /> : <Power size={16} />}
-              {tenant.status === 'ACTIVE' ? 'Tạm khóa' : 'Kích hoạt'}
+              {tenant.status === 'ACTIVE' ? <PowerOff size={14} /> : <Power size={14} />}
+              {tenant.status === 'ACTIVE' ? t('details.suspend') : t('details.activate')}
             </button>
           </div>
         </div>
       </div>
 
       {/* Permission Manager */}
-      <div className="bg-white dark:bg-[#0F172A] rounded-xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-primary/5 text-primary flex items-center justify-center border border-primary/10">
-            <Shield size={20} />
+      <div className="bg-white dark:bg-[#0F172A] rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-8 h-8 rounded-lg bg-primary/5 text-primary flex items-center justify-center">
+            <Shield size={16} />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Kiểm soát quyền truy cập</h2>
-            <p className="text-[13px] text-slate-500 font-medium mt-1">Cấu hình các tính năng và quyền hạn cốt lõi cho không gian làm việc này.</p>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">{t('details.accessControl')}</h2>
+            <p className="text-[12px] text-slate-500 font-medium mt-0.5">{t('details.accessControlDesc')}</p>
           </div>
         </div>
 
