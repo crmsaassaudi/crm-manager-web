@@ -56,7 +56,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-[#F8FAFC] dark:bg-[#020617] transition-colors duration-300">
+    <div className="flex min-h-screen bg-[#F8FAFC] dark:bg-[#020617] transition-colors duration-300 font-sans">
       {/* Sidebar */}
       <motion.aside 
         initial={false}
@@ -69,7 +69,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <Zap size={16} fill="currentColor" />
             </div>
             {!isSidebarCollapsed && (
-              <span className="font-black text-sm tracking-tighter text-slate-900 dark:text-white uppercase">CRM Admin</span>
+              <span className="font-bold text-base tracking-tight text-slate-900 dark:text-white">CRM Admin</span>
             )}
           </div>
         </div>
@@ -82,19 +82,14 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               className={({ isActive }) => `
                 flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all duration-200 group relative
                 ${isActive 
-                  ? 'bg-primary/5 text-primary' 
+                  ? 'bg-primary/5 text-primary font-semibold shadow-sm' 
                   : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200'}
               `}
             >
-              <item.icon size={16} className={`transition-transform duration-200 ${isSidebarCollapsed ? 'mx-auto' : ''}`} />
+              <item.icon size={18} className={`transition-transform duration-200 ${isSidebarCollapsed ? 'mx-auto' : ''}`} />
               {!isSidebarCollapsed && (
-                <span className="text-[13px] font-semibold tracking-tight">{item.label}</span>
+                <span className="text-[14px] leading-none">{item.label}</span>
               )}
-              {/* Active Indicator */}
-              <NavLink 
-                to={item.path} 
-                className={({ isActive }) => isActive && !isSidebarCollapsed ? "absolute left-0 w-1 h-4 bg-primary rounded-r-full" : "hidden"} 
-              />
             </NavLink>
           ))}
         </nav>
@@ -105,7 +100,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all"
           >
             <ChevronLeft size={16} className={`transition-transform duration-300 ${isSidebarCollapsed ? 'rotate-180 mx-auto' : ''}`} />
-            {!isSidebarCollapsed && <span className="text-[12px] font-bold uppercase tracking-wider">Collapse</span>}
+            {!isSidebarCollapsed && <span className="text-[12px] font-medium uppercase tracking-wider">Thu gọn</span>}
           </button>
         </div>
       </motion.aside>
@@ -121,22 +116,22 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
                 <input 
                   type="text" 
-                  placeholder="Search anything..." 
-                  className="bg-slate-100 dark:bg-slate-800/50 border-none rounded-lg pl-9 pr-4 py-1.5 text-[12px] w-48 focus:ring-1 focus:ring-primary/30 outline-none transition-all focus:w-64"
+                  placeholder="Tìm kiếm..." 
+                  className="bg-slate-100 dark:bg-slate-800/50 border-none rounded-lg pl-9 pr-4 py-1.5 text-[13px] w-48 focus:ring-1 focus:ring-primary/30 outline-none transition-all focus:w-64"
                 />
              </div>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             {/* Language Dropdown */}
             <div className="relative" ref={langRef}>
               <button 
                 onClick={() => setIsLangOpen(!isLangOpen)}
-                className="h-8 px-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors flex items-center gap-2 border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+                className="h-8 px-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors flex items-center gap-2 border border-slate-200 dark:border-slate-700 shadow-sm text-[12px] font-medium"
               >
                 <Globe size={16} />
-                <span className="text-[11px] font-black">{i18n.language.toUpperCase()}</span>
-                <ChevronDown size={12} className={`transition-transform duration-200 ${isLangOpen ? 'rotate-180' : ''}`} />
+                <span>{i18n.language.toUpperCase()}</span>
+                <ChevronDown size={14} className={`transition-transform duration-200 ${isLangOpen ? 'rotate-180' : ''}`} />
               </button>
               <AnimatePresence>
                 {isLangOpen && (
@@ -144,7 +139,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     initial={{ opacity: 0, y: 8, scale: 0.98 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 8, scale: 0.98 }}
-                    className="absolute right-0 mt-1.5 w-40 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 z-50"
+                    className="absolute right-0 mt-1.5 w-44 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 z-50 overflow-hidden"
                   >
                     {languages.map((lang) => (
                       <button
@@ -153,13 +148,13 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                           i18n.changeLanguage(lang.code);
                           setIsLangOpen(false);
                         }}
-                        className={`w-full flex items-center justify-between px-3 py-2 text-[12px] hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${i18n.language === lang.code ? 'text-primary font-bold' : 'text-slate-600 dark:text-slate-300'}`}
+                        className={`w-full flex items-center justify-between px-3 py-2.5 text-[13px] hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${i18n.language === lang.code ? 'text-primary font-semibold bg-primary/5' : 'text-slate-600 dark:text-slate-300'}`}
                       >
                         <div className="flex items-center gap-2.5">
                           <span className="text-sm">{lang.flag}</span>
                           <span>{lang.label}</span>
                         </div>
-                        {i18n.language === lang.code && <Check size={12} />}
+                        {i18n.language === lang.code && <Check size={14} />}
                       </button>
                     ))}
                   </motion.div>
@@ -169,12 +164,12 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
             <button 
               onClick={toggleTheme}
-              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors border border-slate-200 dark:border-slate-700 shadow-sm"
             >
               {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
             </button>
 
-            <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors relative border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
+            <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors relative border border-slate-200 dark:border-slate-700 shadow-sm">
               <Bell size={16} />
               <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-rose-500 rounded-full border border-white dark:border-[#0F172A]"></span>
             </button>
@@ -185,7 +180,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <div className="relative" ref={userRef}>
               <button 
                 onClick={() => setIsUserOpen(!isUserOpen)}
-                className="flex items-center gap-2.5 p-1 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+                className="flex items-center gap-2.5 p-1 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border border-slate-200 dark:border-slate-700 shadow-sm"
               >
                 <div className="w-7 h-7 rounded-lg bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 overflow-hidden shadow-sm">
                   <img 
@@ -195,10 +190,10 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   />
                 </div>
                 <div className="text-left hidden sm:block">
-                  <p className="text-[11px] font-black leading-none text-slate-900 dark:text-white">Admin User</p>
-                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter mt-0.5">Manager</p>
+                  <p className="text-[12px] font-semibold leading-none text-slate-900 dark:text-white">Admin User</p>
+                  <p className="text-[10px] text-slate-400 font-medium mt-0.5">Quản trị viên</p>
                 </div>
-                <ChevronDown size={12} className={`text-slate-400 transition-transform duration-200 ${isUserOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isUserOpen ? 'rotate-180' : ''}`} />
               </button>
               
               <AnimatePresence>
@@ -207,28 +202,28 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     initial={{ opacity: 0, y: 8, scale: 0.98 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 8, scale: 0.98 }}
-                    className="absolute right-0 mt-1.5 w-52 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 z-50 overflow-hidden"
+                    className="absolute right-0 mt-1.5 w-56 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 z-50 overflow-hidden"
                   >
-                    <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
-                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Logged in as</p>
-                       <p className="text-[12px] font-bold text-slate-900 dark:text-slate-100 truncate">admin@crm-manager.io</p>
+                    <div className="px-3 py-2.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                       <p className="text-[11px] font-medium text-slate-500 mb-0.5">Đăng nhập bởi</p>
+                       <p className="text-[13px] font-semibold text-slate-900 dark:text-slate-100 truncate">admin@crm-manager.io</p>
                     </div>
                     <div className="p-1 space-y-0.5">
-                      <button className="w-full flex items-center gap-2.5 px-2.5 py-2 text-[12px] text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-colors">
-                        <User size={14} className="text-slate-400" />
-                        Profile Settings
+                      <button className="w-full flex items-center gap-2.5 px-2.5 py-2 text-[13px] text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-colors">
+                        <User size={16} className="text-slate-400" />
+                        Hồ sơ cá nhân
                       </button>
-                      <button className="w-full flex items-center gap-2.5 px-2.5 py-2 text-[12px] text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-colors">
-                        <Shield size={14} className="text-slate-400" />
-                        Security
+                      <button className="w-full flex items-center gap-2.5 px-2.5 py-2 text-[13px] text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-colors">
+                        <Shield size={16} className="text-slate-400" />
+                        Bảo mật & Quyền hạn
                       </button>
                       <div className="h-px bg-slate-100 dark:bg-slate-800 my-1 mx-2"></div>
                       <button 
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-2.5 px-2.5 py-2 text-[12px] text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors font-bold"
+                        className="w-full flex items-center gap-2.5 px-2.5 py-2 text-[13px] text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors font-semibold"
                       >
-                        <LogOut size={14} />
-                        Log out
+                        <LogOut size={16} />
+                        Đăng xuất
                       </button>
                     </div>
                   </motion.div>
@@ -238,7 +233,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
         </header>
 
-        <div className="p-5 max-w-[1400px] mx-auto">
+        <div className="p-6 max-w-[1400px] mx-auto">
           {children}
         </div>
       </main>
