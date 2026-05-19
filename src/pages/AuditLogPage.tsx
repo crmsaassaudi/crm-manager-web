@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Activity,
   ChevronDown,
@@ -58,13 +59,17 @@ const DeltaDisplay = ({
   before: Record<string, unknown>;
   after: Record<string, unknown>;
 }) => {
+  const { t } = useTranslation();
+  const safeBefore = before || {};
+  const safeAfter = after || {};
+
   const allKeys = Array.from(
-    new Set([...Object.keys(before), ...Object.keys(after)]),
+    new Set([...Object.keys(safeBefore), ...Object.keys(safeAfter)]),
   );
 
   if (allKeys.length === 0) {
     return (
-      <p className="text-[12px] text-slate-400 italic px-2">No delta recorded.</p>
+      <p className="text-[12px] text-slate-400 italic px-2">{t('audit.noDelta')}</p>
     );
   }
 
@@ -79,12 +84,12 @@ const DeltaDisplay = ({
       {/* Before */}
       <div>
         <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-          Before
+          {t('audit.before')}
         </p>
         <div className="space-y-0.5">
           {allKeys.map((key) => {
             const changed =
-              JSON.stringify(before[key]) !== JSON.stringify(after[key]);
+              JSON.stringify(safeBefore[key]) !== JSON.stringify(safeAfter[key]);
             return (
               <div
                 key={key}
@@ -98,7 +103,7 @@ const DeltaDisplay = ({
                 <span
                   className={`truncate ${changed ? 'text-rose-600 dark:text-rose-400 font-semibold' : 'text-slate-500'}`}
                 >
-                  {fmt(before[key])}
+                  {fmt(safeBefore[key])}
                 </span>
               </div>
             );
@@ -109,12 +114,12 @@ const DeltaDisplay = ({
       {/* After */}
       <div>
         <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-          After
+          {t('audit.after')}
         </p>
         <div className="space-y-0.5">
           {allKeys.map((key) => {
             const changed =
-              JSON.stringify(before[key]) !== JSON.stringify(after[key]);
+              JSON.stringify(safeBefore[key]) !== JSON.stringify(safeAfter[key]);
             return (
               <div
                 key={key}
@@ -128,7 +133,7 @@ const DeltaDisplay = ({
                 <span
                   className={`truncate ${changed ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-slate-500'}`}
                 >
-                  {fmt(after[key])}
+                  {fmt(safeAfter[key])}
                 </span>
               </div>
             );
@@ -142,6 +147,7 @@ const DeltaDisplay = ({
 // ─── Audit Row ────────────────────────────────────────────────
 
 const AuditRow = ({ entry }: { entry: api.AuditLog }) => {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const meta = ACTION_META[entry.action] ?? {
     label: entry.action,
@@ -157,8 +163,8 @@ const AuditRow = ({ entry }: { entry: api.AuditLog }) => {
   });
 
   const hasDelta =
-    Object.keys(entry.before).length > 0 ||
-    Object.keys(entry.after).length > 0;
+    Object.keys(entry.before || {}).length > 0 ||
+    Object.keys(entry.after || {}).length > 0;
 
   return (
     <>
@@ -179,10 +185,10 @@ const AuditRow = ({ entry }: { entry: api.AuditLog }) => {
 
         {/* Actor */}
         <td className="px-4 py-3">
-          <p className="text-[13px] font-semibold text-slate-800 dark:text-slate-200">
+          <p className="text-[14px] font-bold text-slate-900 dark:text-slate-100">
             {entry.actorEmail}
           </p>
-          <p className="text-[11px] font-mono text-slate-400">{entry.actorIp || '—'}</p>
+          <p className="text-[12px] font-mono text-slate-400">{entry.actorIp || '—'}</p>
         </td>
 
         {/* Action */}
@@ -190,16 +196,16 @@ const AuditRow = ({ entry }: { entry: api.AuditLog }) => {
           <span
             className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-bold ${meta.color}`}
           >
-            {meta.label}
+            {t(`audit.actions.${entry.action}`, meta.label)}
           </span>
         </td>
 
         {/* Target */}
         <td className="px-4 py-3">
-          <p className="text-[13px] font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[160px]">
+          <p className="text-[14px] font-bold text-slate-900 dark:text-slate-100 truncate max-w-[160px]">
             {entry.targetName || entry.targetId}
           </p>
-          <p className="text-[11px] text-slate-400">{entry.targetType}</p>
+          <p className="text-[12px] text-slate-400">{entry.targetType}</p>
         </td>
 
         {/* Expand toggle */}
@@ -251,6 +257,7 @@ const AuditRow = ({ entry }: { entry: api.AuditLog }) => {
 // ─── Main Page ────────────────────────────────────────────────
 
 const AuditLogPage = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
 
   const [data, setData] = useState<api.AuditLogListResponse | null>(null);
@@ -322,10 +329,10 @@ const AuditLogPage = () => {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Audit Log
+            {t('audit.title')}
           </h1>
           <p className="text-[13px] text-slate-500 font-medium mt-1">
-            Compliance trail — every platform change recorded with full before / after delta
+            {t('audit.subtitle')}
           </p>
         </div>
 
@@ -335,7 +342,7 @@ const AuditLogPage = () => {
             <span className="text-[13px] font-bold text-slate-700 dark:text-slate-200">
               {data.total.toLocaleString()}
             </span>
-            <span className="text-[12px] text-slate-400">entries (last 90 days)</span>
+            <span className="text-[12px] text-slate-400">{t('audit.entries')}</span>
           </div>
         )}
       </div>
@@ -351,7 +358,7 @@ const AuditLogPage = () => {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search actor / target…"
+            placeholder={t('audit.searchPlaceholder')}
             className="pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 w-52 dark:text-slate-200"
           />
         </div>
@@ -362,10 +369,10 @@ const AuditLogPage = () => {
           onChange={(e) => { setAction(e.target.value); setPage(1); }}
           className={selectClass}
         >
-          <option value="">All Actions</option>
+          <option value="">{t('audit.allActions')}</option>
           {ALL_ACTIONS.map((a) => (
             <option key={a} value={a}>
-              {ACTION_META[a]?.label ?? a}
+              {t(`audit.actions.${a}`, ACTION_META[a]?.label ?? a)}
             </option>
           ))}
         </select>
@@ -376,7 +383,7 @@ const AuditLogPage = () => {
           onChange={(e) => { setTargetType(e.target.value); setPage(1); }}
           className={selectClass}
         >
-          <option value="">All Types</option>
+          <option value="">{t('audit.allTypes')}</option>
           {ALL_TARGET_TYPES.map((tt) => (
             <option key={tt} value={tt}>{tt}</option>
           ))}
@@ -405,7 +412,7 @@ const AuditLogPage = () => {
             className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-200 dark:border-slate-700"
           >
             <FilterX size={13} />
-            Clear
+            {t('audit.clear')}
           </button>
         )}
       </div>
@@ -419,13 +426,13 @@ const AuditLogPage = () => {
         ) : displayedItems.length === 0 ? (
           <div className="h-64 flex flex-col items-center justify-center gap-2 text-slate-400">
             <Activity size={28} className="opacity-30" />
-            <p className="text-[13px] font-semibold">No audit entries found</p>
+            <p className="text-[13px] font-semibold">{t('audit.noEntries')}</p>
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
                 className="text-[12px] text-primary hover:underline"
               >
-                Clear filters
+                {t('audit.clearFilters')}
               </button>
             )}
           </div>
@@ -435,16 +442,16 @@ const AuditLogPage = () => {
               <thead className="bg-slate-50/70 dark:bg-slate-800/30 border-b border-slate-100 dark:border-slate-800">
                 <tr>
                   <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">
-                    Time
+                    {t('audit.time')}
                   </th>
                   <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                    Actor / IP
+                    {t('audit.actorIp')}
                   </th>
                   <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                    Action
+                    {t('audit.action')}
                   </th>
                   <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                    Target
+                    {t('audit.target')}
                   </th>
                   <th className="px-4 py-3 w-8" />
                 </tr>
@@ -463,8 +470,11 @@ const AuditLogPage = () => {
       {data && data.totalPages > 1 && (
         <div className="flex items-center justify-between text-[13px]">
           <span className="text-slate-500">
-            Showing {(page - 1) * 50 + 1}–{Math.min(page * 50, data.total)} of{' '}
-            {data.total.toLocaleString()} entries
+            {t('audit.showingEntries', {
+              from: (page - 1) * 50 + 1,
+              to: Math.min(page * 50, data.total),
+              total: data.total.toLocaleString(),
+            })}
           </span>
           <div className="flex items-center gap-1">
             <button
@@ -472,7 +482,7 @@ const AuditLogPage = () => {
               onClick={() => setPage((p) => p - 1)}
               className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-medium"
             >
-              ← Prev
+              {t('audit.prev')}
             </button>
 
             {Array.from({ length: Math.min(data.totalPages, 7) }, (_, i) => {
@@ -501,7 +511,7 @@ const AuditLogPage = () => {
               onClick={() => setPage((p) => p + 1)}
               className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-medium"
             >
-              Next →
+              {t('audit.next')}
             </button>
           </div>
         </div>

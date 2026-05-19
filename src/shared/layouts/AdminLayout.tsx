@@ -60,7 +60,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode; user: AuthUser }> = ({
     { id: 'onboarding', icon: Zap, label: t('common.onboarding'), path: '/onboarding' },
     { id: 'permission-groups', icon: ShieldIcon, label: t('common.permissionGroups'), path: '/permission-groups' },
     { id: 'users', icon: User, label: t('common.managerUsers'), path: '/users' },
-    { id: 'audit-logs', icon: ScrollText, label: 'Audit Log', path: '/audit-logs' },
+    { id: 'audit-logs', icon: ScrollText, label: t('common.auditLogs'), path: '/audit-logs' },
     { id: 'settings', icon: Settings, label: t('common.settings'), path: '/settings' },
   ];
 
