@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -50,6 +50,219 @@ const ACTION_META: Record<
   PERMISSION_GROUP_APPLIED:      { label: 'Group Applied',             color: 'bg-violet-50 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400' },
 };
 
+// ─── Searchable Tenant Select ─────────────────────────────────
+
+const SearchableTenantSelect = ({
+  tenants,
+  value,
+  onChange,
+  placeholder,
+}: {
+  tenants: api.Tenant[];
+  value: string;
+  onChange: (val: string) => void;
+  placeholder: string;
+}) => {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const [filterText, setFilterText] = useState('');
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  const selectedTenant = tenants.find((t) => t.id === value || t._id === value);
+  const filtered = tenants.filter(
+    (t) =>
+      t.name.toLowerCase().includes(filterText.toLowerCase()) ||
+      t.alias.toLowerCase().includes(filterText.toLowerCase()),
+  );
+
+  return (
+    <div className="relative w-52" ref={containerRef}>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-[13px] text-slate-700 dark:text-slate-200 outline-none text-left focus:ring-1 focus:ring-primary/30"
+      >
+        <span className="truncate">{selectedTenant ? selectedTenant.name : placeholder}</span>
+        <ChevronDown size={14} className="text-slate-400 shrink-0 ml-1" />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 mt-1.5 w-72 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 z-50">
+          <div className="px-2 py-1.5 border-b border-slate-100 dark:border-slate-800">
+            <input
+              type="text"
+              autoFocus
+              value={filterText}
+              onChange={(e) => setFilterText(e.target.value)}
+              placeholder={t('audit.searchTenant')}
+              className="w-full bg-slate-50 dark:bg-slate-900 rounded-lg px-2.5 py-1 text-[12px] text-slate-700 dark:text-slate-200 outline-none border border-slate-100 dark:border-slate-800 focus:ring-1 focus:ring-primary/20"
+            />
+          </div>
+          <div className="max-h-48 overflow-y-auto p-1 space-y-0.5">
+            <button
+              type="button"
+              onClick={() => {
+                onChange('');
+                setOpen(false);
+                setFilterText('');
+              }}
+              className={`w-full text-left px-2.5 py-1.5 rounded-lg text-[12px] transition-colors ${
+                !value ? 'text-primary font-semibold bg-primary/5' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+              }`}
+            >
+              {t('audit.allTenants')}
+            </button>
+            {filtered.map((t) => {
+              const id = t._id || t.id;
+              const isSelected = value === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => {
+                    onChange(id);
+                    setOpen(false);
+                    setFilterText('');
+                  }}
+                  className={`w-full text-left px-2.5 py-1.5 rounded-lg text-[12px] transition-colors flex flex-col ${
+                    isSelected ? 'text-primary font-semibold bg-primary/5' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                  }`}
+                >
+                  <span className="font-semibold truncate">{t.name}</span>
+                  <span className="text-[10px] text-slate-400 font-mono tracking-tight truncate">
+                    {t.alias}
+                  </span>
+                </button>
+              );
+            })}
+            {filtered.length === 0 && (
+              <p className="text-[11px] text-slate-400 italic text-center py-2">{t('audit.noTenantsFound')}</p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── Searchable User Select ───────────────────────────────────
+
+const SearchableUserSelect = ({
+  users,
+  value,
+  onChange,
+  placeholder,
+}: {
+  users: api.ManagerUser[];
+  value: string;
+  onChange: (val: string) => void;
+  placeholder: string;
+}) => {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const [filterText, setFilterText] = useState('');
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  const selectedUser = users.find((u) => u.id === value);
+  const getDisplayName = (u: api.ManagerUser) => {
+    return [u.firstName, u.lastName].filter(Boolean).join(' ') || u.email;
+  };
+
+  const filtered = users.filter(
+    (u) =>
+      getDisplayName(u).toLowerCase().includes(filterText.toLowerCase()) ||
+      u.email.toLowerCase().includes(filterText.toLowerCase()),
+  );
+
+  return (
+    <div className="relative w-52" ref={containerRef}>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-[13px] text-slate-700 dark:text-slate-200 outline-none text-left focus:ring-1 focus:ring-primary/30"
+      >
+        <span className="truncate">{selectedUser ? getDisplayName(selectedUser) : placeholder}</span>
+        <ChevronDown size={14} className="text-slate-400 shrink-0 ml-1" />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 mt-1.5 w-72 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 z-50">
+          <div className="px-2 py-1.5 border-b border-slate-100 dark:border-slate-800">
+            <input
+              type="text"
+              autoFocus
+              value={filterText}
+              onChange={(e) => setFilterText(e.target.value)}
+              placeholder={t('audit.searchUser')}
+              className="w-full bg-slate-50 dark:bg-slate-900 rounded-lg px-2.5 py-1 text-[12px] text-slate-700 dark:text-slate-200 outline-none border border-slate-100 dark:border-slate-800 focus:ring-1 focus:ring-primary/20"
+            />
+          </div>
+          <div className="max-h-48 overflow-y-auto p-1 space-y-0.5">
+            <button
+              type="button"
+              onClick={() => {
+                onChange('');
+                setOpen(false);
+                setFilterText('');
+              }}
+              className={`w-full text-left px-2.5 py-1.5 rounded-lg text-[12px] transition-colors ${
+                !value ? 'text-primary font-semibold bg-primary/5' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+              }`}
+            >
+              {t('audit.allActors')}
+            </button>
+            {filtered.map((u) => {
+              const isSelected = value === u.id;
+              return (
+                <button
+                  key={u.id}
+                  type="button"
+                  onClick={() => {
+                    onChange(u.id);
+                    setOpen(false);
+                    setFilterText('');
+                  }}
+                  className={`w-full text-left px-2.5 py-1.5 rounded-lg text-[12px] transition-colors flex flex-col ${
+                    isSelected ? 'text-primary font-semibold bg-primary/5' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                  }`}
+                >
+                  <span className="font-semibold truncate">{getDisplayName(u)}</span>
+                  <span className="text-[10px] text-slate-400 font-mono tracking-tight truncate">
+                    {u.email}
+                  </span>
+                </button>
+              );
+            })}
+            {filtered.length === 0 && (
+              <p className="text-[11px] text-slate-400 italic text-center py-2">{t('audit.noUsersFound')}</p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ─── Delta Display ────────────────────────────────────────────
 
 const DeltaDisplay = ({
@@ -75,7 +288,10 @@ const DeltaDisplay = ({
 
   const fmt = (v: unknown) => {
     if (v === undefined || v === null) return '—';
-    if (Array.isArray(v)) return `[${(v as unknown[]).length} items]`;
+    if (Array.isArray(v)) {
+      if (v.length === 0) return '[]';
+      return v.map((item) => (typeof item === 'string' ? item : JSON.stringify(item))).join(', ');
+    }
     return String(JSON.stringify(v)).replace(/^"|"$/g, '');
   };
 
@@ -101,7 +317,7 @@ const DeltaDisplay = ({
               >
                 <span className="text-slate-400 shrink-0">{key}:</span>
                 <span
-                  className={`truncate ${changed ? 'text-rose-600 dark:text-rose-400 font-semibold' : 'text-slate-500'}`}
+                  className={`break-all ${changed ? 'text-rose-600 dark:text-rose-400 font-semibold' : 'text-slate-500'}`}
                 >
                   {fmt(safeBefore[key])}
                 </span>
@@ -131,7 +347,7 @@ const DeltaDisplay = ({
               >
                 <span className="text-slate-400 shrink-0">{key}:</span>
                 <span
-                  className={`truncate ${changed ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-slate-500'}`}
+                  className={`break-all ${changed ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-slate-500'}`}
                 >
                   {fmt(safeAfter[key])}
                 </span>
@@ -185,7 +401,7 @@ const AuditRow = ({ entry }: { entry: api.AuditLog }) => {
 
         {/* Actor */}
         <td className="px-4 py-3">
-          <p className="text-[14px] font-bold text-slate-900 dark:text-slate-100">
+          <p className="text-[14px] font-semibold text-slate-900 dark:text-slate-100">
             {entry.actorEmail}
           </p>
           <p className="text-[12px] font-mono text-slate-400">{entry.actorIp || '—'}</p>
@@ -200,12 +416,23 @@ const AuditRow = ({ entry }: { entry: api.AuditLog }) => {
           </span>
         </td>
 
+        {/* Target Type */}
+        <td className="px-4 py-3">
+          <span className="inline-flex items-center rounded-md bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800/40 px-2.5 py-0.5 text-[11px] font-bold text-slate-500 dark:text-slate-400">
+            {t(`audit.targetTypes.${entry.targetType}`, entry.targetType)}
+          </span>
+        </td>
+
         {/* Target */}
         <td className="px-4 py-3">
-          <p className="text-[14px] font-bold text-slate-900 dark:text-slate-100 truncate max-w-[160px]">
-            {entry.targetName || entry.targetId}
+          <p className="text-[14px] font-semibold text-slate-900 dark:text-slate-100 truncate max-w-[180px]">
+            {entry.targetName || '—'}
           </p>
-          <p className="text-[12px] text-slate-400">{entry.targetType}</p>
+          {entry.targetId && (
+            <p className="text-[11px] font-mono text-slate-400 truncate max-w-[180px]" title={entry.targetId}>
+              ID: {entry.targetId}
+            </p>
+          )}
         </td>
 
         {/* Expand toggle */}
@@ -227,7 +454,7 @@ const AuditRow = ({ entry }: { entry: api.AuditLog }) => {
         {expanded && (
           <tr>
             <td
-              colSpan={5}
+              colSpan={6}
               className="px-4 pb-3 pt-0 bg-slate-50/50 dark:bg-slate-800/20 border-b border-slate-100 dark:border-slate-800"
             >
               <motion.div
@@ -263,26 +490,48 @@ const AuditLogPage = () => {
   const [data, setData] = useState<api.AuditLogListResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Server-side filters
-  const [action, setAction] = useState('');
-  const [targetType, setTargetType] = useState(searchParams.get('targetType') || '');
-  const [targetId, setTargetId] = useState(searchParams.get('targetId') || '');
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
+  // Lists for searchable comboboxes
+  const [tenants, setTenants] = useState<api.Tenant[]>([]);
+  const [users, setUsers] = useState<api.ManagerUser[]>([]);
+
+  // Local filter states
+  const [localAction, setLocalAction] = useState('');
+  const [localTargetType, setLocalTargetType] = useState(searchParams.get('targetType') || '');
+  const [localTargetId, setLocalTargetId] = useState(searchParams.get('targetId') || '');
+  const [localActorId, setLocalActorId] = useState(searchParams.get('actorId') || '');
+  const [localFrom, setLocalFrom] = useState('');
+  const [localTo, setLocalTo] = useState('');
+  const [localSearch, setLocalSearch] = useState('');
+
+  // Active query parameters (passed to API, updated when "Search" is clicked)
+  const [activeQuery, setActiveQuery] = useState({
+    action: '',
+    targetType: searchParams.get('targetType') || '',
+    targetId: searchParams.get('targetId') || '',
+    actorId: searchParams.get('actorId') || '',
+    from: '',
+    to: '',
+    search: '',
+  });
+
   const [page, setPage] = useState(1);
 
-  // Client-side text search (actor email + target name)
-  const [search, setSearch] = useState('');
+  // Load selection catalogs
+  useEffect(() => {
+    api.fetchTenants().then(setTenants).catch(console.error);
+    api.fetchManagerUsers().then(setUsers).catch(console.error);
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const result = await api.fetchAuditLogs({
-        action: action || undefined,
-        targetType: targetType || undefined,
-        targetId: targetId || undefined,
-        from: from || undefined,
-        to: to || undefined,
+        action: activeQuery.action || undefined,
+        targetType: activeQuery.targetType || undefined,
+        targetId: activeQuery.targetId || undefined,
+        actorId: activeQuery.actorId || undefined,
+        from: activeQuery.from || undefined,
+        to: activeQuery.to || undefined,
         page,
         limit: 50,
       });
@@ -290,35 +539,68 @@ const AuditLogPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [action, targetType, targetId, from, to, page]);
+  }, [activeQuery, page]);
 
   useEffect(() => {
     void load();
   }, [load]);
 
-  const clearFilters = () => {
-    setAction('');
-    setTargetType('');
-    setTargetId('');
-    setFrom('');
-    setTo('');
-    setSearch('');
+  const handleSearch = () => {
+    setActiveQuery({
+      action: localAction,
+      targetType: localTargetType,
+      targetId: localTargetId,
+      actorId: localActorId,
+      from: localFrom,
+      to: localTo,
+      search: localSearch,
+    });
     setPage(1);
   };
 
-  const hasActiveFilters = !!(action || targetType || targetId || from || to || search);
+  const clearFilters = () => {
+    setLocalAction('');
+    setLocalTargetType('');
+    setLocalTargetId('');
+    setLocalActorId('');
+    setLocalFrom('');
+    setLocalTo('');
+    setLocalSearch('');
+
+    const resetQuery = {
+      action: '',
+      targetType: '',
+      targetId: '',
+      actorId: '',
+      from: '',
+      to: '',
+      search: '',
+    };
+    setActiveQuery(resetQuery);
+    setPage(1);
+  };
+
+  const hasActiveFilters = !!(
+    activeQuery.action ||
+    activeQuery.targetType ||
+    activeQuery.targetId ||
+    activeQuery.actorId ||
+    activeQuery.from ||
+    activeQuery.to ||
+    activeQuery.search
+  );
 
   const displayedItems = useMemo(() => {
     if (!data) return [];
-    if (!search.trim()) return data.items;
-    const q = search.trim().toLowerCase();
+    if (!activeQuery.search.trim()) return data.items;
+    const q = activeQuery.search.trim().toLowerCase();
     return data.items.filter(
       (e) =>
         e.actorEmail.toLowerCase().includes(q) ||
         e.targetName.toLowerCase().includes(q) ||
         e.targetId.toLowerCase().includes(q),
     );
-  }, [data, search]);
+  }, [data, activeQuery.search]);
 
   const selectClass =
     'rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-[13px] text-slate-700 dark:text-slate-200 outline-none focus:ring-1 focus:ring-primary/30';
@@ -335,16 +617,6 @@ const AuditLogPage = () => {
             {t('audit.subtitle')}
           </p>
         </div>
-
-        {data && (
-          <div className="flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0F172A] px-4 py-2 shadow-sm">
-            <Activity size={15} className="text-primary" />
-            <span className="text-[13px] font-bold text-slate-700 dark:text-slate-200">
-              {data.total.toLocaleString()}
-            </span>
-            <span className="text-[12px] text-slate-400">{t('audit.entries')}</span>
-          </div>
-        )}
       </div>
 
       {/* Filter bar */}
@@ -356,17 +628,47 @@ const AuditLogPage = () => {
             className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
           />
           <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
             placeholder={t('audit.searchPlaceholder')}
             className="pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 w-52 dark:text-slate-200"
           />
         </div>
 
-        {/* Action type */}
+        {/* Actor Select (Searchable) */}
+        <SearchableUserSelect
+          users={users}
+          value={localActorId}
+          onChange={setLocalActorId}
+          placeholder={t('audit.selectActor')}
+        />
+
+        {/* Target Type select */}
         <select
-          value={action}
-          onChange={(e) => { setAction(e.target.value); setPage(1); }}
+          value={localTargetType}
+          onChange={(e) => setLocalTargetType(e.target.value)}
+          className={selectClass}
+        >
+          <option value="">{t('audit.targetTypes.ALL')}</option>
+          {ALL_TARGET_TYPES.map((tt) => (
+            <option key={tt} value={tt}>
+              {t(`audit.targetTypes.${tt}`, tt)}
+            </option>
+          ))}
+        </select>
+
+        {/* Target Select (Searchable) */}
+        <SearchableTenantSelect
+          tenants={tenants}
+          value={localTargetId}
+          onChange={setLocalTargetId}
+          placeholder={t('audit.selectTenant')}
+        />
+
+        {/* Action type select */}
+        <select
+          value={localAction}
+          onChange={(e) => setLocalAction(e.target.value)}
           className={selectClass}
         >
           <option value="">{t('audit.allActions')}</option>
@@ -377,44 +679,43 @@ const AuditLogPage = () => {
           ))}
         </select>
 
-        {/* Target type */}
-        <select
-          value={targetType}
-          onChange={(e) => { setTargetType(e.target.value); setPage(1); }}
-          className={selectClass}
-        >
-          <option value="">{t('audit.allTypes')}</option>
-          {ALL_TARGET_TYPES.map((tt) => (
-            <option key={tt} value={tt}>{tt}</option>
-          ))}
-        </select>
-
         {/* Date range */}
         <div className="flex items-center gap-2">
           <input
             type="date"
-            value={from}
-            onChange={(e) => { setFrom(e.target.value); setPage(1); }}
+            value={localFrom}
+            onChange={(e) => setLocalFrom(e.target.value)}
             className={selectClass}
           />
           <span className="text-[12px] text-slate-400">→</span>
           <input
             type="date"
-            value={to}
-            onChange={(e) => { setTo(e.target.value); setPage(1); }}
+            value={localTo}
+            onChange={(e) => setLocalTo(e.target.value)}
             className={selectClass}
           />
         </div>
 
-        {hasActiveFilters && (
+        {/* Form control buttons */}
+        <div className="flex items-center gap-2">
           <button
-            onClick={clearFilters}
-            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-200 dark:border-slate-700"
+            onClick={handleSearch}
+            className="flex items-center gap-1.5 rounded-lg px-4 py-1.5 text-[13px] font-semibold bg-primary text-white hover:bg-primary/90 transition-colors shadow-sm cursor-pointer"
           >
-            <FilterX size={13} />
-            {t('audit.clear')}
+            <Search size={14} />
+            {t('audit.searchButton')}
           </button>
-        )}
+
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-200 dark:border-slate-700 cursor-pointer"
+            >
+              <FilterX size={13} />
+              {t('audit.clear')}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Table */}
@@ -449,6 +750,9 @@ const AuditLogPage = () => {
                   </th>
                   <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">
                     {t('audit.action')}
+                  </th>
+                  <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                    {t('audit.targetType')}
                   </th>
                   <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">
                     {t('audit.target')}
