@@ -99,35 +99,35 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
   return (
     <div className="space-y-5">
       {/* Header Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex bg-slate-100/50 dark:bg-slate-800/30 p-1 rounded-lg">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex bg-slate-100/50 dark:bg-slate-800/30 p-1 rounded-lg w-full lg:w-auto">
           <button 
             onClick={() => setActiveTab('feature')}
-            className={`px-4 py-1.5 rounded-md text-[13px] font-medium transition-all ${activeTab === 'feature' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            className={`flex-1 lg:flex-none text-center px-4 py-1.5 rounded-md text-[13px] font-medium transition-all ${activeTab === 'feature' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
           >
             {t('permissions.features')}
           </button>
           <button 
             onClick={() => setActiveTab('core')}
-            className={`px-4 py-1.5 rounded-md text-[13px] font-medium transition-all ${activeTab === 'core' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            className={`flex-1 lg:flex-none text-center px-4 py-1.5 rounded-md text-[13px] font-medium transition-all ${activeTab === 'core' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
           >
             {t('permissions.core')}
           </button>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          <div className="relative">
+        <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+          <div className="relative flex-1 min-w-[200px]">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input 
               type="text"
               placeholder={t('permissions.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-[13px] w-64 focus:ring-1 focus:ring-primary/30 outline-none shadow-sm text-slate-900 dark:text-white"
+              className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-[13px] w-full focus:ring-1 focus:ring-primary/30 outline-none shadow-sm text-slate-900 dark:text-white"
             />
           </div>
           {activeTab === 'feature' && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 shrink-0">
                <button 
                  onClick={onRevokeAll}
                  disabled={isSaving}
@@ -149,14 +149,14 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
           <button
             onClick={onReset}
             disabled={isSaving || !hasChanges}
-            className="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-800 text-[12px] font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm cursor-pointer"
+            className="flex-1 sm:flex-none h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-800 text-[12px] font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm cursor-pointer whitespace-nowrap"
           >
             {t('common.cancel')}
           </button>
           <button
             onClick={onSave}
             disabled={isSaving || !hasChanges}
-            className="h-9 px-3 rounded-xl bg-primary text-white text-[12px] font-bold hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex items-center gap-1.5 cursor-pointer shadow-primary/20 shadow-md"
+            className="flex-1 sm:flex-none h-9 px-3 rounded-xl bg-primary text-white text-[12px] font-bold hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer shadow-primary/20 shadow-md whitespace-nowrap"
           >
             <Save size={14} />
             {t('common.save')}
@@ -215,13 +215,13 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
             <Layers size={16} />
               <span className="text-[11px] font-bold uppercase tracking-widest">{t('permissions.quickTemplates')}</span>
           </div>
-          <div className="flex gap-2.5">
+          <div className="flex flex-wrap gap-2.5">
             {permissionGroups.map(template => (
               <button
                 key={template.id}
                 onClick={() => onApplyTemplate(template.permissions)}
                 disabled={isSaving}
-                className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-[12px] font-bold tracking-tight transition-all shadow-sm uppercase"
+                className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-[12px] font-bold tracking-tight transition-all shadow-sm uppercase cursor-pointer"
                 title={template.description}
               >
                 {template.name}

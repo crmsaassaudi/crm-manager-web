@@ -245,7 +245,7 @@ const ManagerUsersPage = () => {
                 </p>
               </div>
             </div>
-            <div className="relative">
+            <div className="relative w-full sm:w-64">
               <Search
                 size={15}
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
@@ -254,7 +254,7 @@ const ManagerUsersPage = () => {
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder={t('managerUsers.searchUsers')}
-                className="w-64 rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900"
+                className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900"
               />
             </div>
           </div>

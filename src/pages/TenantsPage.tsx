@@ -142,14 +142,14 @@ const TenantsPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{t('tenants.title')}</h1>
           <p className="text-[13px] text-slate-500 font-medium mt-1">{t('tenants.subtitle')}</p>
         </div>
         <button
           onClick={() => navigate('/onboarding')}
-          className="flex items-center gap-1.5 bg-primary hover:bg-primary/95 text-white px-4 py-2.5 rounded-xl font-bold text-[13px] transition-all shadow-lg shadow-primary/20 hover:scale-[1.01] active:scale-[0.98]"
+          className="flex items-center justify-center gap-1.5 bg-primary hover:bg-primary/95 text-white px-4 py-2.5 rounded-xl font-bold text-[13px] transition-all shadow-lg shadow-primary/20 hover:scale-[1.01] active:scale-[0.98] w-full sm:w-auto"
         >
           <Plus size={16} />
           {t('tenants.addTenant')}

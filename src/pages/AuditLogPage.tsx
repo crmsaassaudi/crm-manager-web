@@ -86,7 +86,7 @@ const SearchableTenantSelect = ({
   );
 
   return (
-    <div className="relative w-52" ref={containerRef}>
+    <div className="relative w-full sm:w-52" ref={containerRef}>
       <button
         type="button"
         onClick={() => setOpen(!open)}
@@ -95,9 +95,9 @@ const SearchableTenantSelect = ({
         <span className="truncate">{selectedTenant ? selectedTenant.name : placeholder}</span>
         <ChevronDown size={14} className="text-slate-400 shrink-0 ml-1" />
       </button>
-
+ 
       {open && (
-        <div className="absolute left-0 mt-1.5 w-72 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 z-50">
+        <div className="absolute left-0 mt-1.5 w-full sm:w-72 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 z-50">
           <div className="px-2 py-1.5 border-b border-slate-100 dark:border-slate-800">
             <input
               type="text"
@@ -195,7 +195,7 @@ const SearchableUserSelect = ({
   );
 
   return (
-    <div className="relative w-52" ref={containerRef}>
+    <div className="relative w-full sm:w-52" ref={containerRef}>
       <button
         type="button"
         onClick={() => setOpen(!open)}
@@ -204,9 +204,9 @@ const SearchableUserSelect = ({
         <span className="truncate">{selectedUser ? getDisplayName(selectedUser) : placeholder}</span>
         <ChevronDown size={14} className="text-slate-400 shrink-0 ml-1" />
       </button>
-
+ 
       {open && (
-        <div className="absolute left-0 mt-1.5 w-72 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 z-50">
+        <div className="absolute left-0 mt-1.5 w-full sm:w-72 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 z-50">
           <div className="px-2 py-1.5 border-b border-slate-100 dark:border-slate-800">
             <input
               type="text"
@@ -296,7 +296,7 @@ const DeltaDisplay = ({
   };
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Before */}
       <div>
         <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
@@ -603,12 +603,12 @@ const AuditLogPage = () => {
   }, [data, activeQuery.search]);
 
   const selectClass =
-    'rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-[13px] text-slate-700 dark:text-slate-200 outline-none focus:ring-1 focus:ring-primary/30';
-
+    'w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-[13px] text-slate-700 dark:text-slate-200 outline-none focus:ring-1 focus:ring-primary/30';
+ 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
             {t('audit.title')}
@@ -618,11 +618,11 @@ const AuditLogPage = () => {
           </p>
         </div>
       </div>
-
+ 
       {/* Filter bar */}
-      <div className="flex flex-wrap gap-3 items-center bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:flex xl:flex-wrap gap-3 items-end bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm">
         {/* Text search */}
-        <div className="relative">
+        <div className="relative w-full xl:w-52">
           <Search
             size={14}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
@@ -631,10 +631,10 @@ const AuditLogPage = () => {
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
             placeholder={t('audit.searchPlaceholder')}
-            className="pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 w-52 dark:text-slate-200"
+            className="pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 w-full dark:text-slate-200"
           />
         </div>
-
+ 
         {/* Actor Select (Searchable) */}
         <SearchableUserSelect
           users={users}
@@ -642,21 +642,23 @@ const AuditLogPage = () => {
           onChange={setLocalActorId}
           placeholder={t('audit.selectActor')}
         />
-
+ 
         {/* Target Type select */}
-        <select
-          value={localTargetType}
-          onChange={(e) => setLocalTargetType(e.target.value)}
-          className={selectClass}
-        >
-          <option value="">{t('audit.targetTypes.ALL')}</option>
-          {ALL_TARGET_TYPES.map((tt) => (
-            <option key={tt} value={tt}>
-              {t(`audit.targetTypes.${tt}`, tt)}
-            </option>
-          ))}
-        </select>
-
+        <div className="w-full xl:w-auto">
+          <select
+            value={localTargetType}
+            onChange={(e) => setLocalTargetType(e.target.value)}
+            className={selectClass}
+          >
+            <option value="">{t('audit.targetTypes.ALL')}</option>
+            {ALL_TARGET_TYPES.map((tt) => (
+              <option key={tt} value={tt}>
+                {t(`audit.targetTypes.${tt}`, tt)}
+              </option>
+            ))}
+          </select>
+        </div>
+ 
         {/* Target Select (Searchable) */}
         <SearchableTenantSelect
           tenants={tenants}
@@ -664,23 +666,25 @@ const AuditLogPage = () => {
           onChange={setLocalTargetId}
           placeholder={t('audit.selectTenant')}
         />
-
+ 
         {/* Action type select */}
-        <select
-          value={localAction}
-          onChange={(e) => setLocalAction(e.target.value)}
-          className={selectClass}
-        >
-          <option value="">{t('audit.allActions')}</option>
-          {ALL_ACTIONS.map((a) => (
-            <option key={a} value={a}>
-              {t(`audit.actions.${a}`, ACTION_META[a]?.label ?? a)}
-            </option>
-          ))}
-        </select>
-
+        <div className="w-full xl:w-auto">
+          <select
+            value={localAction}
+            onChange={(e) => setLocalAction(e.target.value)}
+            className={selectClass}
+          >
+            <option value="">{t('audit.allActions')}</option>
+            {ALL_ACTIONS.map((a) => (
+              <option key={a} value={a}>
+                {t(`audit.actions.${a}`, ACTION_META[a]?.label ?? a)}
+              </option>
+            ))}
+          </select>
+        </div>
+ 
         {/* Date range */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full xl:w-auto sm:col-span-2 lg:col-span-1">
           <input
             type="date"
             value={localFrom}
@@ -695,21 +699,21 @@ const AuditLogPage = () => {
             className={selectClass}
           />
         </div>
-
+ 
         {/* Form control buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full xl:w-auto sm:col-span-2 lg:col-span-1">
           <button
             onClick={handleSearch}
-            className="flex items-center gap-1.5 rounded-lg px-4 py-1.5 text-[13px] font-semibold bg-primary text-white hover:bg-primary/90 transition-colors shadow-sm cursor-pointer"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 rounded-lg px-4 py-1.5 text-[13px] font-semibold bg-primary text-white hover:bg-primary/90 transition-colors shadow-sm cursor-pointer whitespace-nowrap h-[34px]"
           >
             <Search size={14} />
             {t('audit.searchButton')}
           </button>
-
+ 
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-200 dark:border-slate-700 cursor-pointer"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-200 dark:border-slate-700 cursor-pointer whitespace-nowrap h-[34px]"
             >
               <FilterX size={13} />
               {t('audit.clear')}

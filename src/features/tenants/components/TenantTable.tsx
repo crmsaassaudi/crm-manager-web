@@ -131,9 +131,9 @@ const TenantTable: React.FC<TenantTableProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3 flex-1 min-w-[320px]">
-          <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1 w-full">
+          <div className="relative flex-1 w-full sm:max-w-sm">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input 
               type="text"
@@ -146,7 +146,7 @@ const TenantTable: React.FC<TenantTableProps> = ({
           <select 
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-[13px] font-bold text-slate-700 dark:text-slate-300 focus:ring-1 focus:ring-primary/30 outline-none shadow-sm cursor-pointer"
+            className="w-full sm:w-auto bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-[13px] font-bold text-slate-700 dark:text-slate-300 focus:ring-1 focus:ring-primary/30 outline-none shadow-sm cursor-pointer"
           >
             <option value="ALL">{t('common.allStatus')}</option>
             <option value="ACTIVE">{t('common.active')}</option>

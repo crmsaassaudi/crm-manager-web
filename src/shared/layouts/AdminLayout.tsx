@@ -18,6 +18,8 @@ import {
   Check,
   Shield as ShieldIcon,
   ScrollText,
+  Menu,
+  X,
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -36,10 +38,21 @@ const AdminLayout: React.FC<{ children: React.ReactNode; user: AuthUser }> = ({
   const { t, i18n } = useTranslation();
   const { theme, toggleTheme } = useTheme();
   const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isUserOpen, setIsUserOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -71,18 +84,35 @@ const AdminLayout: React.FC<{ children: React.ReactNode; user: AuthUser }> = ({
 
   return (
     <div className="flex min-h-screen bg-[#F8FAFC] dark:bg-[#020617] transition-colors duration-300 font-sans">
+      {/* Mobile Sidebar Backdrop */}
+      <AnimatePresence>
+        {isMobile && isMobileSidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.4 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsMobileSidebarOpen(false)}
+            className="fixed inset-0 bg-black z-[45]"
+          />
+        )}
+      </AnimatePresence>
+
       {/* Sidebar */}
       <motion.aside 
         initial={false}
-        animate={{ width: isSidebarCollapsed ? 64 : 220 }}
+        animate={{ 
+          width: isMobile ? 220 : (isSidebarCollapsed ? 64 : 220),
+          x: isMobile ? (isMobileSidebarOpen ? 0 : -220) : 0
+        }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         className="fixed inset-y-0 left-0 z-50 flex flex-col bg-white dark:bg-[#0F172A] border-r border-slate-200 dark:border-slate-800 shadow-sm"
       >
         <div className="h-14 flex items-center px-4 border-b border-slate-100 dark:border-slate-800/50">
-          <div className={`flex items-center gap-2 ${isSidebarCollapsed ? 'mx-auto' : ''}`}>
+          <div className={`flex items-center gap-2 ${(isSidebarCollapsed && !isMobile) ? 'mx-auto' : ''}`}>
             <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-white shadow-sm shadow-primary/20">
               <Zap size={16} fill="currentColor" />
             </div>
-            {!isSidebarCollapsed && (
+            {(!isSidebarCollapsed || isMobile) && (
               <span className="font-bold text-base tracking-tight text-slate-900 dark:text-white">CRM Admin</span>
             )}
           </div>
@@ -93,6 +123,11 @@ const AdminLayout: React.FC<{ children: React.ReactNode; user: AuthUser }> = ({
             <NavLink
               key={item.id}
               to={item.path}
+              onClick={() => {
+                if (isMobile) {
+                  setIsMobileSidebarOpen(false);
+                }
+              }}
               className={({ isActive }) => `
                 flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all duration-200 group relative
                 ${isActive 
@@ -100,8 +135,8 @@ const AdminLayout: React.FC<{ children: React.ReactNode; user: AuthUser }> = ({
                   : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200'}
               `}
             >
-              <item.icon size={18} className={`transition-transform duration-200 ${isSidebarCollapsed ? 'mx-auto' : ''}`} />
-              {!isSidebarCollapsed && (
+              <item.icon size={18} className={`transition-transform duration-200 ${(isSidebarCollapsed && !isMobile) ? 'mx-auto' : ''}`} />
+              {(!isSidebarCollapsed || isMobile) && (
                 <span className="text-[14px] leading-none">{item.label}</span>
               )}
             </NavLink>
@@ -109,43 +144,61 @@ const AdminLayout: React.FC<{ children: React.ReactNode; user: AuthUser }> = ({
         </nav>
 
         <div className="p-2 border-t border-slate-100 dark:border-slate-800/50">
-          <button 
-            onClick={() => setSidebarCollapsed(!isSidebarCollapsed)}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all"
-          >
-            <ChevronLeft size={16} className={`transition-transform duration-300 ${isSidebarCollapsed ? 'rotate-180 mx-auto' : ''}`} />
-            {!isSidebarCollapsed && <span className="text-[12px] font-medium uppercase tracking-wider">{t('common.collapse')}</span>}
-          </button>
+          {isMobile ? (
+            <button 
+              onClick={() => setIsMobileSidebarOpen(false)}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all justify-center"
+            >
+              <X size={16} className="text-slate-400" />
+              <span className="text-[12px] font-medium uppercase tracking-wider">{t('common.close', { defaultValue: 'Close' })}</span>
+            </button>
+          ) : (
+            <button 
+              onClick={() => setSidebarCollapsed(!isSidebarCollapsed)}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all"
+            >
+              <ChevronLeft size={16} className={`transition-transform duration-300 ${isSidebarCollapsed ? 'rotate-180 mx-auto' : ''}`} />
+              {!isSidebarCollapsed && <span className="text-[12px] font-medium uppercase tracking-wider">{t('common.collapse')}</span>}
+            </button>
+          )}
         </div>
       </motion.aside>
 
       {/* Main Content */}
       <main 
-        className={`flex-1 transition-all duration-300 ${isSidebarCollapsed ? 'pl-16' : 'pl-[220px]'}`}
+        className={`flex-1 transition-all duration-300 ${isMobile ? 'pl-0' : (isSidebarCollapsed ? 'pl-16' : 'pl-[220px]')}`}
       >
         {/* Header */}
-        <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#0F172A]/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800/50 h-14 flex items-center px-6 justify-between">
-          <div className="flex items-center gap-4">
+        <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#0F172A]/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800/50 h-14 flex items-center px-4 md:px-6 justify-between">
+          <div className="flex items-center gap-2 md:gap-4">
+             {isMobile && (
+               <button
+                 onClick={() => setIsMobileSidebarOpen(true)}
+                 className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 mr-1"
+               >
+                 <Menu size={20} />
+               </button>
+             )}
              <div className="relative group">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
                 <input 
                   type="text" 
                   placeholder={t('common.search')} 
-                  className="bg-slate-100 dark:bg-slate-800/50 border-none rounded-lg pl-9 pr-4 py-1.5 text-[13px] w-48 focus:ring-1 focus:ring-primary/30 outline-none transition-all focus:w-64"
+                  className="bg-slate-100 dark:bg-slate-800/50 border-none rounded-lg pl-9 pr-4 py-1.5 text-[13px] w-24 xs:w-36 sm:w-48 focus:ring-1 focus:ring-primary/30 outline-none transition-all focus:w-32 xs:focus:w-44 sm:focus:w-64"
                 />
              </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 md:gap-2">
             {/* Language Dropdown */}
             <div className="relative" ref={langRef}>
               <button 
                 onClick={() => setIsLangOpen(!isLangOpen)}
-                className="h-8 px-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors flex items-center gap-2 text-[12px] font-medium"
+                className="h-8 px-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors flex items-center gap-1 text-[12px] font-medium"
               >
-                <Globe size={16} />
-                <span>{i18n.language.toUpperCase()}</span>
-                <ChevronDown size={14} className={`transition-transform duration-200 ${isLangOpen ? 'rotate-180' : ''}`} />
+                <Globe size={15} />
+                <span className="hidden xs:inline">{i18n.language.toUpperCase()}</span>
+                <ChevronDown size={12} className={`transition-transform duration-200 ${isLangOpen ? 'rotate-180' : ''}`} />
               </button>
               <AnimatePresence>
                 {isLangOpen && (
@@ -153,7 +206,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode; user: AuthUser }> = ({
                     initial={{ opacity: 0, y: 8, scale: 0.98 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 8, scale: 0.98 }}
-                    className="absolute right-0 mt-1.5 w-44 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 z-50 overflow-hidden"
+                    className="absolute right-0 mt-1.5 w-40 bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 z-50 overflow-hidden"
                   >
                     {languages.map((lang) => (
                       <button
@@ -162,9 +215,9 @@ const AdminLayout: React.FC<{ children: React.ReactNode; user: AuthUser }> = ({
                           i18n.changeLanguage(lang.code);
                           setIsLangOpen(false);
                         }}
-                        className={`w-full flex items-center justify-between px-3 py-2.5 text-[13px] hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${i18n.language === lang.code ? 'text-primary font-semibold bg-primary/5' : 'text-slate-600 dark:text-slate-300'}`}
+                        className={`w-full flex items-center justify-between px-3 py-2 text-[13px] hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${i18n.language === lang.code ? 'text-primary font-semibold bg-primary/5' : 'text-slate-600 dark:text-slate-300'}`}
                       >
-                        <div className="flex items-center gap-2.5">
+                        <div className="flex items-center gap-2">
                           <span className="text-sm">{lang.flag}</span>
                           <span>{lang.label}</span>
                         </div>
@@ -180,21 +233,21 @@ const AdminLayout: React.FC<{ children: React.ReactNode; user: AuthUser }> = ({
               onClick={toggleTheme}
               className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors"
             >
-              {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+              {theme === 'light' ? <Moon size={15} /> : <Sun size={15} />}
             </button>
 
             <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors relative">
-              <Bell size={16} />
+              <Bell size={15} />
               <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-rose-500 rounded-full border border-white dark:border-[#0F172A]"></span>
             </button>
 
-            <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1.5"></div>
+            <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1"></div>
 
             {/* User Dropdown */}
             <div className="relative" ref={userRef}>
               <button 
                 onClick={() => setIsUserOpen(!isUserOpen)}
-                className="flex items-center gap-2.5 p-1 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                className="flex items-center gap-1.5 md:gap-2.5 p-1 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
               >
                 <div className="w-7 h-7 rounded-lg bg-slate-200 dark:bg-slate-800 overflow-hidden">
                   <img
@@ -203,7 +256,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode; user: AuthUser }> = ({
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="text-left hidden sm:block">
+                <div className="text-left hidden md:block">
                   <p className="text-[12px] font-semibold leading-none text-slate-900 dark:text-white">
                     {user.name || user.preferred_username || t('layout.adminUser')}
                   </p>
@@ -211,7 +264,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode; user: AuthUser }> = ({
                     {t('layout.adminRole')}
                   </p>
                 </div>
-                <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isUserOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown size={14} className="text-slate-400 transition-transform duration-200" />
               </button>
               
               <AnimatePresence>
@@ -255,7 +308,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode; user: AuthUser }> = ({
           </div>
         </header>
 
-        <div className="p-6 max-w-[1400px] mx-auto">
+        <div className="p-4 sm:p-6 max-w-[1400px] mx-auto">
           {children}
         </div>
       </main>
