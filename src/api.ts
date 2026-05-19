@@ -16,7 +16,18 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const url = originalRequest?.url || '';
+    const isAuthRequest =
+      url.includes('/auth/refresh') ||
+      url.includes('/auth/login') ||
+      url.includes('/auth/logout');
+
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      !isAuthRequest
+    ) {
       originalRequest._retry = true;
       try {
         await api.get('/auth/refresh');
@@ -25,6 +36,9 @@ api.interceptors.response.use(
         window.dispatchEvent(new Event('crm-manager-auth:logout'));
         return Promise.reject(refreshError);
       }
+    }
+    if (error.response?.status === 401 && isAuthRequest) {
+      window.dispatchEvent(new Event('crm-manager-auth:logout'));
     }
     return Promise.reject(error);
   },
