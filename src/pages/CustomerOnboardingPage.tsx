@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import * as api from '../api';
 import { showToast } from '../App';
+import { useProvisioningStatus } from '../hooks/useProvisioningStatus';
 
 const CustomerOnboardingPage = () => {
   const { t } = useTranslation();
@@ -25,12 +26,14 @@ const CustomerOnboardingPage = () => {
     autoInvite: true,
   });
   const [provisioningId, setProvisioningId] = useState<string | null>(null);
-  const [status, setStatus] = useState<api.ProvisioningStatus | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [retrying, setRetrying] = useState(false);
   const [inviteSending, setInviteSending] = useState(false);
   const [inviteSent, setInviteSent] = useState(false);
+
+  // WebSocket-first with HTTP polling fallback (see useProvisioningStatus hook)
+  const status = useProvisioningStatus(provisioningId);
 
   const progress = useMemo(() => {
     if (!status) return 0;
@@ -38,21 +41,6 @@ const CustomerOnboardingPage = () => {
     if (status.status === 'FAILED') return 0;
     return Math.round((status.currentStep / status.totalSteps) * 100);
   }, [status]);
-
-  useEffect(() => {
-    if (!provisioningId) return undefined;
-
-    const timer = window.setInterval(async () => {
-      try {
-        const next = await api.fetchProvisioningStatus(provisioningId);
-        setStatus(next);
-      } catch {
-        setMessage(t('onboarding.waitingStatus', { defaultValue: 'Waiting for provisioning process...' }));
-      }
-    }, 2000);
-
-    return () => window.clearInterval(timer);
-  }, [provisioningId, t]);
 
   useEffect(() => {
     if (
@@ -71,7 +59,6 @@ const CustomerOnboardingPage = () => {
     setSubmitting(true);
     setMessage(null);
     setInviteSent(false);
-    setStatus(null);
     try {
       const result = await api.provisionCustomer({
         companyName: form.companyName,
@@ -80,12 +67,6 @@ const CustomerOnboardingPage = () => {
         plan: form.plan,
       });
       setProvisioningId(result.provisioningId);
-      setStatus({
-        status: result.status,
-        currentStep: 0,
-        totalSteps: 10,
-        stepLabel: t('onboarding.queued', { defaultValue: 'Queued...' }),
-      });
       setMessage(t('onboarding.provisioningQueued', { id: result.provisioningId, defaultValue: `Provisioning enqueued: ${result.provisioningId}` }));
       showToast(t('onboarding.provisioningQueuedToast', { defaultValue: 'Tenant provisioning enqueued successfully.' }), 'success');
     } catch (error: any) {
@@ -102,12 +83,6 @@ const CustomerOnboardingPage = () => {
     setMessage(null);
     try {
       await api.retryProvisioning(provisioningId);
-      setStatus({
-        status: 'QUEUED',
-        currentStep: 0,
-        totalSteps: 10,
-        stepLabel: t('onboarding.queued', { defaultValue: 'Queued (Retrying)...' }),
-      });
       setMessage(t('onboarding.retryQueued', { defaultValue: 'Safe idempotency retry successfully enqueued.' }));
       showToast(t('onboarding.retryQueuedToast', { defaultValue: 'Idempotent retry successfully triggered!' }), 'success');
     } catch (error: any) {
