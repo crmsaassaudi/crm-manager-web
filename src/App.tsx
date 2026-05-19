@@ -8,6 +8,7 @@ import TenantDetailPage from './pages/TenantDetailPage';
 import PermissionGroupsPage from './pages/PermissionGroupsPage';
 import ManagerUsersPage from './pages/ManagerUsersPage';
 import CustomerOnboardingPage from './pages/CustomerOnboardingPage';
+import AuditLogPage from './pages/AuditLogPage';
 import { Shield, Check, X, ArrowRight, Zap, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -180,6 +181,7 @@ const App = () => {
           <Route path="/permission-groups" element={<PermissionGroupsPage />} />
           <Route path="/users" element={<ManagerUsersPage />} />
           <Route path="/onboarding" element={<CustomerOnboardingPage />} />
+          <Route path="/audit-logs" element={<AuditLogPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AdminLayout>

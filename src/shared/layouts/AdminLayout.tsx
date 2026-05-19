@@ -1,14 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../core/ThemeContext';
-import { 
-  LayoutDashboard, 
-  Users, 
-  Settings, 
-  Sun, 
-  Moon, 
-  Globe, 
-  ChevronLeft, 
+import {
+  LayoutDashboard,
+  Users,
+  Settings,
+  Sun,
+  Moon,
+  Globe,
+  ChevronLeft,
   Bell,
   Search,
   Zap,
@@ -16,7 +16,8 @@ import {
   User,
   ChevronDown,
   Check,
-  Shield as ShieldIcon
+  Shield as ShieldIcon,
+  ScrollText,
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -60,6 +61,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode; user: AuthUser }> = ({
     { id: 'onboarding', icon: Zap, label: t('common.onboarding'), path: '/onboarding' },
     { id: 'permission-groups', icon: ShieldIcon, label: t('common.permissionGroups'), path: '/permission-groups' },
     { id: 'users', icon: User, label: t('common.managerUsers'), path: '/users' },
+    { id: 'audit-logs', icon: ScrollText, label: 'Audit Log', path: '/audit-logs' },
     { id: 'settings', icon: Settings, label: t('common.settings'), path: '/settings' },
   ];
 

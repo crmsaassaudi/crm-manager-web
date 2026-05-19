@@ -203,4 +203,42 @@ export const inviteCustomerUser = (
 export const fetchDashboardStats = () =>
   api.get('/analytics/dashboard').then((r) => r.data);
 
+export type AuditLog = {
+  id: string;
+  actorId: string;
+  actorEmail: string;
+  actorIp: string;
+  actorUserAgent: string;
+  action: string;
+  targetType: string;
+  targetId: string;
+  targetName: string;
+  before: Record<string, unknown>;
+  after: Record<string, unknown>;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+};
+
+export type AuditLogListResponse = {
+  items: AuditLog[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+export const fetchAuditLogs = (params: {
+  targetId?: string;
+  actorId?: string;
+  action?: string;
+  targetType?: string;
+  from?: string;
+  to?: string;
+  page?: number;
+  limit?: number;
+}) =>
+  api
+    .get<AuditLogListResponse>('/audit-logs', { params })
+    .then((r) => r.data);
+
 export default api;
