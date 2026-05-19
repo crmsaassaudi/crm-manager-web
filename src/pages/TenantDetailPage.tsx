@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -93,6 +93,24 @@ const TenantDetailPage = () => {
     !sameSet(localGranted, savedGranted) ||
     !sameSet(localDisabledCore, savedDisabledCore);
 
+  const initialMatchingGroup = useMemo(() => {
+    if (!permData || !permissionGroups.length) return null;
+    return permissionGroups.find(group => {
+      const groupPerms = new Set(group.permissions);
+      return groupPerms.size === savedGranted.size && 
+             Array.from(savedGranted).every(p => groupPerms.has(p));
+    });
+  }, [permissionGroups, savedGranted, permData]);
+
+  const localMatchingGroup = useMemo(() => {
+    if (!permData || !permissionGroups.length) return null;
+    return permissionGroups.find(group => {
+      const groupPerms = new Set(group.permissions);
+      return groupPerms.size === localGranted.size && 
+             Array.from(localGranted).every(p => groupPerms.has(p));
+    });
+  }, [permissionGroups, localGranted, permData]);
+
   const handleToggle = (perm: string, checked: boolean) => {
     setLocalGranted(prev => {
       const next = new Set(prev);
@@ -116,8 +134,33 @@ const TenantDetailPage = () => {
     });
   };
 
-  const handleSavePermissions = async () => {
+  const handleSavePermissions = async (bypassConfirm = false) => {
     if (!id || !permData?.corePermissions) return;
+
+    // Check for configuration drift warning
+    if (
+      !bypassConfirm &&
+      initialMatchingGroup &&
+      (!localMatchingGroup || localMatchingGroup.id !== initialMatchingGroup.id)
+    ) {
+      setConfirmModal({
+        isOpen: true,
+        title: t('permissions.overrideTitle', { defaultValue: 'Configuration Drift Alert' }),
+        message: t('permissions.confirmOverride', {
+          groupName: initialMatchingGroup.name,
+          defaultValue: `Tenant này đang không tuân thủ theo Group gốc "${initialMatchingGroup.name}", bạn có chắc chắn muốn tách riêng?`
+        }),
+        type: 'warning',
+        confirmText: t('permissions.decoupleConfirm', { defaultValue: 'Yes, Decouple & Save' }),
+        cancelText: t('common.cancel'),
+        onConfirm: () => {
+          closeConfirmModal();
+          void handleSavePermissions(true);
+        }
+      });
+      return;
+    }
+
     setSaving(true);
     try {
       const enabledCore = permData.corePermissions.filter(

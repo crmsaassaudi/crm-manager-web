@@ -88,6 +88,14 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
 
   const currentGroups = filteredGroups(activeTab === 'feature' ? featureGroups : coreGroups);
 
+  const currentMatchingGroup = useMemo(() => {
+    return permissionGroups.find(group => {
+      const groupPerms = new Set(group.permissions);
+      return groupPerms.size === grantedPermissions.size && 
+             Array.from(grantedPermissions).every(p => groupPerms.has(p));
+    });
+  }, [permissionGroups, grantedPermissions]);
+
   return (
     <div className="space-y-5">
       {/* Header Controls */}
@@ -115,7 +123,7 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
               placeholder={t('permissions.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-[13px] w-64 focus:ring-1 focus:ring-primary/30 outline-none shadow-sm"
+              className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-[13px] w-64 focus:ring-1 focus:ring-primary/30 outline-none shadow-sm text-slate-900 dark:text-white"
             />
           </div>
           {activeTab === 'feature' && (
@@ -123,7 +131,7 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
                <button 
                  onClick={onRevokeAll}
                  disabled={isSaving}
-                 className="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-400 transition-all shadow-sm"
+                 className="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-400 transition-all shadow-sm cursor-pointer"
                  title={t('permissions.revokeAll')}
                >
                  <RotateCcw size={16} />
@@ -131,7 +139,7 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
                <button 
                  onClick={onGrantAll}
                  disabled={isSaving}
-                 className="w-9 h-9 flex items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 transition-all shadow-sm"
+                 className="w-9 h-9 flex items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 transition-all shadow-sm cursor-pointer"
                  title={t('permissions.grantAll')}
                >
                  <Zap size={16} />
@@ -141,20 +149,64 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
           <button
             onClick={onReset}
             disabled={isSaving || !hasChanges}
-            className="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-800 text-[12px] font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+            className="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-800 text-[12px] font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm cursor-pointer"
           >
             {t('common.cancel')}
           </button>
           <button
             onClick={onSave}
             disabled={isSaving || !hasChanges}
-            className="h-9 px-3 rounded-xl bg-primary text-white text-[12px] font-bold hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex items-center gap-1.5"
+            className="h-9 px-3 rounded-xl bg-primary text-white text-[12px] font-bold hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex items-center gap-1.5 cursor-pointer shadow-primary/20 shadow-md"
           >
             <Save size={14} />
             {t('common.save')}
           </button>
         </div>
       </div>
+
+      {/* Configuration Drift Indicator Banner */}
+      {activeTab === 'feature' && (
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`flex items-center justify-between p-4 rounded-2xl border transition-all duration-300 ${
+            currentMatchingGroup 
+              ? 'bg-emerald-50/40 border-emerald-100 dark:bg-emerald-500/5 dark:border-emerald-950/50' 
+              : 'bg-amber-50/40 border-amber-100 dark:bg-amber-500/5 dark:border-amber-950/50'
+          }`}
+        >
+          <div className="flex items-center gap-3.5">
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center border transition-all ${
+              currentMatchingGroup 
+                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400' 
+                : 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400'
+            }`}>
+              <Shield size={18} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[13px] font-bold text-slate-900 dark:text-white">
+                  {t('permissions.syncStatus')}
+                </span>
+                <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border ${
+                  currentMatchingGroup 
+                    ? 'bg-emerald-100/60 text-emerald-700 border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400' 
+                    : 'bg-amber-100/60 text-amber-700 border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-400'
+                }`}>
+                  {currentMatchingGroup 
+                    ? t('permissions.synced') 
+                    : t('permissions.customOverride')}
+                </span>
+              </div>
+              <p className="text-[12px] text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                {currentMatchingGroup 
+                  ? t('permissions.syncedDesc', { name: currentMatchingGroup.name })
+                  : t('permissions.driftDesc')}
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Template Selector */}
       {activeTab === 'feature' && (

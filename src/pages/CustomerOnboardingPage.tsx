@@ -9,8 +9,11 @@ import {
   Rocket,
   Send,
   User,
+  RefreshCw,
+  AlertCircle,
 } from 'lucide-react';
 import * as api from '../api';
+import { showToast } from '../App';
 
 const CustomerOnboardingPage = () => {
   const { t } = useTranslation();
@@ -25,12 +28,14 @@ const CustomerOnboardingPage = () => {
   const [status, setStatus] = useState<api.ProvisioningStatus | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [retrying, setRetrying] = useState(false);
   const [inviteSending, setInviteSending] = useState(false);
   const [inviteSent, setInviteSent] = useState(false);
 
   const progress = useMemo(() => {
     if (!status) return 0;
     if (status.status === 'READY') return 100;
+    if (status.status === 'FAILED') return 0;
     return Math.round((status.currentStep / status.totalSteps) * 100);
   }, [status]);
 
@@ -42,7 +47,7 @@ const CustomerOnboardingPage = () => {
         const next = await api.fetchProvisioningStatus(provisioningId);
         setStatus(next);
       } catch {
-        setMessage(t('onboarding.waitingStatus'));
+        setMessage(t('onboarding.waitingStatus', { defaultValue: 'Waiting for provisioning process...' }));
       }
     }, 2000);
 
@@ -78,14 +83,37 @@ const CustomerOnboardingPage = () => {
       setStatus({
         status: result.status,
         currentStep: 0,
-        totalSteps: 9,
-        stepLabel: t('onboarding.queued'),
+        totalSteps: 10,
+        stepLabel: t('onboarding.queued', { defaultValue: 'Queued...' }),
       });
-      setMessage(t('onboarding.provisioningQueued', { id: result.provisioningId }));
+      setMessage(t('onboarding.provisioningQueued', { id: result.provisioningId, defaultValue: `Provisioning enqueued: ${result.provisioningId}` }));
+      showToast(t('onboarding.provisioningQueuedToast', { defaultValue: 'Tenant provisioning enqueued successfully.' }), 'success');
     } catch (error: any) {
-      setMessage(error.response?.data?.message || t('onboarding.onboardingError'));
+      setMessage(error.response?.data?.message || t('onboarding.onboardingError', { defaultValue: 'Onboarding error occurred.' }));
+      showToast(error.response?.data?.message || t('onboarding.onboardingError', { defaultValue: 'Onboarding error occurred.' }), 'error');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleRetry = async () => {
+    if (!provisioningId) return;
+    setRetrying(true);
+    setMessage(null);
+    try {
+      await api.retryProvisioning(provisioningId);
+      setStatus({
+        status: 'QUEUED',
+        currentStep: 0,
+        totalSteps: 10,
+        stepLabel: t('onboarding.queued', { defaultValue: 'Queued (Retrying)...' }),
+      });
+      setMessage(t('onboarding.retryQueued', { defaultValue: 'Safe idempotency retry successfully enqueued.' }));
+      showToast(t('onboarding.retryQueuedToast', { defaultValue: 'Idempotent retry successfully triggered!' }), 'success');
+    } catch (error: any) {
+      showToast(error.response?.data?.message || t('onboarding.retryError', { defaultValue: 'Could not trigger retry.' }), 'error');
+    } finally {
+      setRetrying(false);
     }
   };
 
@@ -98,9 +126,11 @@ const CustomerOnboardingPage = () => {
         role: 'OWNER',
       });
       setInviteSent(true);
-      setMessage(t('onboarding.inviteSentSuccess'));
+      setMessage(t('onboarding.inviteSentSuccess', { defaultValue: 'Invitation sent successfully.' }));
+      showToast(t('onboarding.inviteSentSuccess', { defaultValue: 'Invitation sent successfully.' }), 'success');
     } catch (error: any) {
-      setMessage(error.response?.data?.message || t('onboarding.inviteError'));
+      setMessage(error.response?.data?.message || t('onboarding.inviteError', { defaultValue: 'Could not send invitation.' }));
+      showToast(error.response?.data?.message || t('onboarding.inviteError', { defaultValue: 'Could not send invitation.' }), 'error');
     } finally {
       setInviteSending(false);
     }
@@ -114,10 +144,10 @@ const CustomerOnboardingPage = () => {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            {t('onboarding.title')}
+            {t('onboarding.title', { defaultValue: 'Customer Onboarding' })}
           </h1>
           <p className="text-[13px] text-slate-500 font-medium mt-1">
-            {t('onboarding.subtitle')}
+            {t('onboarding.subtitle', { defaultValue: 'Provision workspaces and channels for onboarding customers.' })}
           </p>
         </div>
         {message && (
@@ -135,10 +165,10 @@ const CustomerOnboardingPage = () => {
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                {t('onboarding.newCustomer')}
+                {t('onboarding.newCustomer', { defaultValue: 'New Customer' })}
               </h2>
               <p className="text-[12px] text-slate-500">
-                {t('onboarding.provisioningFlow')}
+                {t('onboarding.provisioningFlow', { defaultValue: 'Trigger provisioning sagas' })}
               </p>
             </div>
           </div>
@@ -158,8 +188,8 @@ const CustomerOnboardingPage = () => {
                   }))
                 }
                 required
-                placeholder={t('onboarding.companyName')}
-                className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900"
+                placeholder={t('onboarding.companyName', { defaultValue: 'Company Name' })}
+                className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900 text-slate-900 dark:text-white"
               />
             </div>
             <div className="relative">
@@ -176,8 +206,8 @@ const CustomerOnboardingPage = () => {
                   }))
                 }
                 required
-                placeholder={t('onboarding.ownerName')}
-                className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900"
+                placeholder={t('onboarding.ownerName', { defaultValue: 'Owner Name' })}
+                className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900 text-slate-900 dark:text-white"
               />
             </div>
             <div className="relative">
@@ -195,8 +225,8 @@ const CustomerOnboardingPage = () => {
                 }
                 type="email"
                 required
-                placeholder={t('onboarding.ownerEmail')}
-                className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900"
+                placeholder={t('onboarding.ownerEmail', { defaultValue: 'Owner Email' })}
+                className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900 text-slate-900 dark:text-white"
               />
             </div>
             <select
@@ -207,13 +237,13 @@ const CustomerOnboardingPage = () => {
                   plan: event.target.value as 'FREE' | 'PRO' | 'ENTERPRISE',
                 }))
               }
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900 text-slate-900 dark:text-white cursor-pointer"
             >
               <option value="FREE">Free</option>
               <option value="PRO">Pro</option>
               <option value="ENTERPRISE">Enterprise</option>
             </select>
-            <label className="flex items-center gap-3 rounded-lg border border-slate-200 px-3 py-2 text-[12px] font-semibold text-slate-600 dark:border-slate-800 dark:text-slate-300">
+            <label className="flex items-center gap-3 rounded-lg border border-slate-200 px-3 py-2 text-[12px] font-semibold text-slate-600 dark:border-slate-800 dark:text-slate-300 cursor-pointer">
               <input
                 type="checkbox"
                 checked={form.autoInvite}
@@ -223,118 +253,156 @@ const CustomerOnboardingPage = () => {
                     autoInvite: event.target.checked,
                   }))
                 }
+                className="cursor-pointer"
               />
-              {t('onboarding.autoInvite')}
+              {t('onboarding.autoInvite', { defaultValue: 'Auto-invite user once ready' })}
             </label>
             <button
               type="submit"
               disabled={submitting || isRunning}
-              className="w-full h-10 rounded-lg bg-primary text-white text-[13px] font-bold disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full h-10 rounded-lg bg-primary hover:bg-primary/95 text-white text-[13px] font-bold disabled:opacity-50 flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer shadow-lg shadow-primary/20"
             >
               {submitting ? (
                 <Loader2 size={15} className="animate-spin" />
               ) : (
                 <ArrowRight size={15} />
               )}
-              {t('onboarding.startButton')}
+              {t('onboarding.startButton', { defaultValue: 'Start Onboarding' })}
             </button>
           </form>
         </section>
 
-        <section className="bg-white dark:bg-[#0F172A] rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm min-h-[360px]">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                {t('onboarding.provisioningStatus')}
-              </h2>
-              <p className="text-[12px] text-slate-500 mt-1">
-                {provisioningId || t('onboarding.noJobRunning')}
-              </p>
-            </div>
-            <div
-              className={`rounded-lg px-3 py-1.5 text-[11px] font-bold uppercase ${
-                status?.status === 'READY'
-                  ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10'
-                  : status?.status === 'FAILED'
-                    ? 'bg-rose-50 text-rose-600 dark:bg-rose-500/10'
-                    : 'bg-slate-100 text-slate-500 dark:bg-slate-800'
-              }`}
-            >
-              {status?.status || t('onboarding.idle')}
-            </div>
-          </div>
-
-          <div className="mt-8 flex items-center gap-5">
-            <div className="w-16 h-16 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              {status?.status === 'READY' ? (
-                <CheckCircle2 size={32} />
-              ) : (
-                <Loader2
-                  size={32}
-                  className={isRunning ? 'animate-spin' : undefined}
-                />
-              )}
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                {status?.stepLabel || t('onboarding.readyDesc')}
-              </h3>
-              <p className="mt-1 text-[13px] text-slate-500">
-                {status
-                  ? t('onboarding.stepLabel', { current: status.currentStep, total: status.totalSteps })
-                  : t('onboarding.submitFormDesc')}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-8">
-            <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+        <section className="bg-white dark:bg-[#0F172A] rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm min-h-[360px] flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                  {t('onboarding.provisioningStatus', { defaultValue: 'Provisioning Status' })}
+                </h2>
+                <p className="text-[12px] text-slate-500 mt-1 font-mono">
+                  {provisioningId || t('onboarding.noJobRunning', { defaultValue: 'No active job running' })}
+                </p>
+              </div>
               <div
-                className="h-full rounded-full bg-primary transition-all duration-500"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            <div className="mt-2 flex justify-between text-[11px] font-semibold text-slate-400">
-              <span>{progress}%</span>
-              {status?.redirectUrl && (
-                <a
-                  href={status.redirectUrl}
-                  className="text-primary hover:underline"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {t('onboarding.openLogin')}
-                </a>
-              )}
-            </div>
-          </div>
-
-          {isReady && (
-            <div className="mt-8 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/60 dark:bg-emerald-500/10">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h3 className="text-[14px] font-bold text-emerald-700 dark:text-emerald-300">
-                    {t('onboarding.readyTitle')}
-                  </h3>
-                  <p className="text-[12px] text-emerald-700/80 dark:text-emerald-300/80">
-                    Tenant id: {status.tenantId}
-                  </p>
-                </div>
-                <button
-                  onClick={() => void sendInvite(status.tenantId!)}
-                  disabled={inviteSending || inviteSent}
-                  className="h-9 rounded-lg bg-emerald-600 px-3 text-[12px] font-bold text-white disabled:opacity-60 flex items-center gap-2"
-                >
-                  {inviteSending ? (
-                    <Loader2 size={14} className="animate-spin" />
-                  ) : (
-                    <Send size={14} />
-                  )}
-                  {inviteSent ? t('onboarding.inviteSent') : t('onboarding.sendInvite')}
-                </button>
+                className={`rounded-lg px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider ${
+                  status?.status === 'READY'
+                    ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10'
+                    : status?.status === 'FAILED'
+                      ? 'bg-rose-50 text-rose-600 dark:bg-rose-500/10'
+                      : 'bg-slate-100 text-slate-500 dark:bg-slate-800'
+                }`}
+              >
+                {status?.status || t('onboarding.idle', { defaultValue: 'Idle' })}
               </div>
             </div>
-          )}
+
+            <div className="mt-8 flex items-center gap-5">
+              <div className="w-16 h-16 rounded-2xl bg-primary/5 text-primary flex items-center justify-center shrink-0">
+                {status?.status === 'READY' ? (
+                  <CheckCircle2 size={32} className="text-emerald-500" />
+                ) : status?.status === 'FAILED' ? (
+                  <AlertCircle size={32} className="text-rose-500" />
+                ) : (
+                  <Loader2
+                    size={32}
+                    className={isRunning ? 'animate-spin' : 'text-slate-300'}
+                  />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white truncate">
+                  {status?.stepLabel || t('onboarding.readyDesc', { defaultValue: 'Ready to provision' })}
+                </h3>
+                <p className="mt-1 text-[13px] text-slate-500">
+                  {status
+                    ? t('onboarding.stepLabel', { current: status.currentStep, total: status.totalSteps, defaultValue: `Step ${status.currentStep} of ${status.totalSteps}` })
+                    : t('onboarding.submitFormDesc', { defaultValue: 'Submit form to start creation' })}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-8">
+              <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden shadow-inner">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    status?.status === 'FAILED' ? 'bg-rose-500' : 'bg-primary'
+                  }`}
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <div className="mt-2.5 flex justify-between text-[11px] font-semibold text-slate-400">
+                <span>{progress}%</span>
+                {status?.redirectUrl && (
+                  <a
+                    href={status.redirectUrl}
+                    className="text-primary hover:underline flex items-center gap-1"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {t('onboarding.openLogin', { defaultValue: 'Launch Workspace' })}
+                    <ArrowRight size={12} />
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            {/* Success state Panel */}
+            {isReady && (
+              <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/60 dark:bg-emerald-500/10">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-[14px] font-bold text-emerald-700 dark:text-emerald-300">
+                      {t('onboarding.readyTitle', { defaultValue: 'Workspace Ready!' })}
+                    </h3>
+                    <p className="text-[12px] text-emerald-700/80 dark:text-emerald-300/80">
+                      Tenant id: {status.tenantId}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => void sendInvite(status.tenantId!)}
+                    disabled={inviteSending || inviteSent}
+                    className="h-9 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-[12px] font-bold text-white disabled:opacity-60 flex items-center gap-2 px-4 shadow-sm cursor-pointer"
+                  >
+                    {inviteSending ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <Send size={14} />
+                    )}
+                    {inviteSent ? t('onboarding.inviteSent', { defaultValue: 'Invite Sent' }) : t('onboarding.sendInvite', { defaultValue: 'Send Invite' })}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Idempotent Recovery Retry Panel */}
+            {status?.status === 'FAILED' && (
+              <div className="mt-6 rounded-xl border border-rose-200 bg-rose-50 p-4 dark:border-rose-900/60 dark:bg-rose-500/10">
+                <h3 className="text-[14px] font-bold text-rose-700 dark:text-rose-300">
+                  {t('onboarding.failedTitle', { defaultValue: 'Setup Failed' })}
+                </h3>
+                <p className="text-[12px] text-rose-700/80 dark:text-rose-300/80 mt-1">
+                  {status.error || 'Workspace setup failed. Our team has been notified.'}
+                </p>
+                {status.retryable && (
+                  <button
+                    type="button"
+                    onClick={handleRetry}
+                    disabled={retrying}
+                    className="mt-4 w-full h-9 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[12px] font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer shadow-md shadow-rose-600/10"
+                  >
+                    {retrying ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <RefreshCw size={14} className="shrink-0" />
+                    )}
+                    {t('onboarding.safeRetry', { defaultValue: 'Safe Idempotency Retry' })}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </section>
       </div>
     </div>

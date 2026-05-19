@@ -206,6 +206,11 @@ export const fetchProvisioningStatus = (provisioningId: string) =>
     .get<ProvisioningStatus>(`/onboarding/status/${provisioningId}`)
     .then((r) => r.data);
 
+export const retryProvisioning = (provisioningId: string) =>
+  api
+    .post<{ status: string; provisioningId: string }>(`/onboarding/status/${provisioningId}/retry`)
+    .then((r) => r.data);
+
 export const inviteCustomerUser = (
   tenantId: string,
   data: { email: string; role: 'OWNER' | 'ADMIN' | 'MEMBER' },
