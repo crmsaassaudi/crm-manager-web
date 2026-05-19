@@ -28,6 +28,10 @@ const TenantDetailPage = () => {
   const [localDisabledCore, setLocalDisabledCore] = useState<Set<string>>(
     new Set(),
   );
+  const [savedGranted, setSavedGranted] = useState<Set<string>>(new Set());
+  const [savedDisabledCore, setSavedDisabledCore] = useState<Set<string>>(
+    new Set(),
+  );
   const [permissionGroups, setPermissionGroups] = useState<api.PermissionGroup[]>([]);
 
   const loadData = useCallback(async () => {
@@ -41,8 +45,12 @@ const TenantDetailPage = () => {
       setTenant(tData);
       setPermData(pData);
       setPermissionGroups(groupsData);
-      setLocalGranted(new Set(pData.grantedFeaturePermissions));
-      setLocalDisabledCore(new Set(pData.disabledCorePermissions || []));
+      const granted = new Set<string>(pData.grantedFeaturePermissions || []);
+      const disabledCore = new Set<string>(pData.disabledCorePermissions || []);
+      setLocalGranted(granted);
+      setSavedGranted(new Set(granted));
+      setLocalDisabledCore(disabledCore);
+      setSavedDisabledCore(new Set(disabledCore));
     } catch (err) {
       console.error(err);
     } finally {
@@ -54,72 +62,115 @@ const TenantDetailPage = () => {
     void loadData();
   }, [loadData]);
 
-  const handleToggle = async (perm: string, checked: boolean) => {
-    if (!id) return;
-    setSaving(true);
+  const sameSet = (a: Set<string>, b: Set<string>) =>
+    a.size === b.size && Array.from(a).every((value) => b.has(value));
+
+  const hasPermissionChanges =
+    !sameSet(localGranted, savedGranted) ||
+    !sameSet(localDisabledCore, savedDisabledCore);
+
+  const handleToggle = (perm: string, checked: boolean) => {
     setLocalGranted(prev => {
       const next = new Set(prev);
       if (checked) next.add(perm);
       else next.delete(perm);
       return next;
     });
-
-    try {
-      if (checked) await api.grantFeaturePermissions(id, [perm]);
-      else await api.revokeFeaturePermissions(id, [perm]);
-    } catch (err) {
-      console.error(err);
-      // Rollback
-      setLocalGranted(prev => {
-        const next = new Set(prev);
-        if (checked) next.delete(perm);
-        else next.add(perm);
-        return next;
-      });
-    } finally {
-      setSaving(false);
-    }
   };
 
-  const handleApplyTemplate = async (perms: string[]) => {
-    if (!id) return;
-    setSaving(true);
-    try {
-      const allowed = new Set<string>(permData?.featurePermissions || []);
-      const featurePerms = perms.filter((perm) => allowed.has(perm));
-      const result = await api.setFeaturePermissions(id, featurePerms);
-      setLocalGranted(new Set(result.grantedFeaturePermissions));
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSaving(false);
-    }
+  const handleApplyTemplate = (perms: string[]) => {
+    const allowed = new Set<string>(permData?.featurePermissions || []);
+    setLocalGranted(new Set(perms.filter((perm) => allowed.has(perm))));
   };
 
-  const handleToggleCore = async (perm: string, checked: boolean) => {
-    if (!id || !permData?.corePermissions) return;
-    setSaving(true);
+  const handleToggleCore = (perm: string, checked: boolean) => {
     setLocalDisabledCore(prev => {
       const next = new Set(prev);
       if (checked) next.delete(perm);
       else next.add(perm);
       return next;
     });
+  };
 
+  const handleSavePermissions = async () => {
+    if (!id || !permData?.corePermissions) return;
+    setSaving(true);
     try {
-      const enabledCore = permData.corePermissions.filter((corePerm: string) =>
-        corePerm === perm ? checked : !localDisabledCore.has(corePerm),
+      const enabledCore = permData.corePermissions.filter(
+        (corePerm: string) => !localDisabledCore.has(corePerm),
       );
-      const result = await api.setCorePermissions(id, enabledCore);
-      setLocalDisabledCore(new Set(result.disabledCorePermissions || []));
+      const [featureResult, coreResult] = await Promise.all([
+        api.setFeaturePermissions(id, Array.from(localGranted)),
+        api.setCorePermissions(id, enabledCore),
+      ]);
+      const granted = new Set<string>(
+        featureResult.grantedFeaturePermissions || [],
+      );
+      const disabledCore = new Set<string>(
+        coreResult.disabledCorePermissions || [],
+      );
+      setLocalGranted(granted);
+      setSavedGranted(new Set(granted));
+      setLocalDisabledCore(disabledCore);
+      setSavedDisabledCore(new Set(disabledCore));
     } catch (err) {
       console.error(err);
-      setLocalDisabledCore(prev => {
-        const next = new Set(prev);
-        if (checked) next.add(perm);
-        else next.delete(perm);
-        return next;
-      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleResetPermissions = () => {
+    setLocalGranted(new Set(savedGranted));
+    setLocalDisabledCore(new Set(savedDisabledCore));
+  };
+
+  const handleGrantAll = () => {
+    if (
+      !window.confirm(
+        t('permissions.confirmGrantAll', {
+          defaultValue:
+            'Grant all feature permissions? Changes will be saved only after you click Save.',
+        }),
+      )
+    ) return;
+    handleApplyTemplate(permData?.featurePermissions || []);
+  };
+
+  const handleRevokeAll = () => {
+    if (
+      !window.confirm(
+        t('permissions.confirmRevokeAll', {
+          defaultValue:
+            'Revoke all feature permissions? Changes will be saved only after you click Save.',
+        }),
+      )
+    ) return;
+    handleApplyTemplate([]);
+  };
+
+  const handleToggleStatus = async () => {
+    if (!id || !tenant) return;
+    const nextStatus = tenant.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+    const confirmKey =
+      nextStatus === 'SUSPENDED'
+        ? 'details.confirmSuspend'
+        : 'details.confirmActivate';
+    if (
+      !window.confirm(
+        t(confirmKey, {
+          name: tenant.name,
+          defaultValue: `${nextStatus === 'SUSPENDED' ? 'Suspend' : 'Activate'} ${tenant.name}?`,
+        }),
+      )
+    ) return;
+
+    setSaving(true);
+    try {
+      const updated = await api.updateTenantStatus(id, nextStatus);
+      setTenant(updated);
+    } catch (err) {
+      console.error(err);
     } finally {
       setSaving(false);
     }
@@ -164,13 +215,20 @@ const TenantDetailPage = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 rounded-lg font-medium transition-all text-[13px] text-slate-700 dark:text-slate-200">
+            <button
+              onClick={() => navigate(`/audit-logs?targetId=${tenant.id}&targetType=TENANT`)}
+              className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 rounded-lg font-medium transition-all text-[13px] text-slate-700 dark:text-slate-200"
+            >
               <Activity size={14} />
               {t('details.viewLog')}
             </button>
-            <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all text-[13px] ${
+            <button
+              onClick={handleToggleStatus}
+              disabled={saving}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all text-[13px] disabled:opacity-50 ${
               tenant.status === 'ACTIVE' ? 'bg-rose-50 text-rose-600 hover:bg-rose-100' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
-            }`}>
+            }`}
+            >
               {tenant.status === 'ACTIVE' ? <PowerOff size={14} /> : <Power size={14} />}
               {tenant.status === 'ACTIVE' ? t('details.suspend') : t('details.activate')}
             </button>
@@ -198,10 +256,13 @@ const TenantDetailPage = () => {
           permissionGroups={permissionGroups}
           onToggle={handleToggle}
           onToggleCore={handleToggleCore}
-          onGrantAll={() => handleApplyTemplate(permData?.featurePermissions || [])}
-          onRevokeAll={() => handleApplyTemplate([])}
+          onGrantAll={handleGrantAll}
+          onRevokeAll={handleRevokeAll}
           onApplyTemplate={handleApplyTemplate}
+          onSave={handleSavePermissions}
+          onReset={handleResetPermissions}
           isSaving={saving}
+          hasChanges={hasPermissionChanges}
         />
       </div>
     </div>

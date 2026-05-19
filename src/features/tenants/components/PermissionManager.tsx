@@ -29,7 +29,10 @@ interface PermissionManagerProps {
   onGrantAll: () => void;
   onRevokeAll: () => void;
   onApplyTemplate: (perms: string[]) => void;
+  onSave: () => void;
+  onReset: () => void;
   isSaving: boolean;
+  hasChanges: boolean;
 }
 
 const PermissionManager: React.FC<PermissionManagerProps> = ({
@@ -43,7 +46,10 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
   onGrantAll,
   onRevokeAll,
   onApplyTemplate,
-  isSaving
+  onSave,
+  onReset,
+  isSaving,
+  hasChanges
 }) => {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
@@ -132,6 +138,21 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
                </button>
             </div>
           )}
+          <button
+            onClick={onReset}
+            disabled={isSaving || !hasChanges}
+            className="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-800 text-[12px] font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+          >
+            {t('common.cancel')}
+          </button>
+          <button
+            onClick={onSave}
+            disabled={isSaving || !hasChanges}
+            className="h-9 px-3 rounded-xl bg-primary text-white text-[12px] font-bold hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex items-center gap-1.5"
+          >
+            <Save size={14} />
+            {t('common.save')}
+          </button>
         </div>
       </div>
 

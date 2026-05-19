@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import {
   Activity,
   ChevronDown,
@@ -251,14 +251,15 @@ const AuditRow = ({ entry }: { entry: api.AuditLog }) => {
 // ─── Main Page ────────────────────────────────────────────────
 
 const AuditLogPage = () => {
-  const { t } = useTranslation();
+  const [searchParams] = useSearchParams();
 
   const [data, setData] = useState<api.AuditLogListResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Server-side filters
   const [action, setAction] = useState('');
-  const [targetType, setTargetType] = useState('');
+  const [targetType, setTargetType] = useState(searchParams.get('targetType') || '');
+  const [targetId, setTargetId] = useState(searchParams.get('targetId') || '');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [page, setPage] = useState(1);
@@ -272,6 +273,7 @@ const AuditLogPage = () => {
       const result = await api.fetchAuditLogs({
         action: action || undefined,
         targetType: targetType || undefined,
+        targetId: targetId || undefined,
         from: from || undefined,
         to: to || undefined,
         page,
@@ -281,7 +283,7 @@ const AuditLogPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [action, targetType, from, to, page]);
+  }, [action, targetType, targetId, from, to, page]);
 
   useEffect(() => {
     void load();
@@ -290,13 +292,14 @@ const AuditLogPage = () => {
   const clearFilters = () => {
     setAction('');
     setTargetType('');
+    setTargetId('');
     setFrom('');
     setTo('');
     setSearch('');
     setPage(1);
   };
 
-  const hasActiveFilters = !!(action || targetType || from || to || search);
+  const hasActiveFilters = !!(action || targetType || targetId || from || to || search);
 
   const displayedItems = useMemo(() => {
     if (!data) return [];

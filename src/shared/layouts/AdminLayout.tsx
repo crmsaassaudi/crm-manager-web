@@ -21,7 +21,6 @@ import {
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import * as api from '../../api';
 
 interface AuthUser {
   sub?: string;
