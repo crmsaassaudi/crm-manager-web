@@ -13,7 +13,9 @@ import {
   Building2
 } from 'lucide-react';
 import * as api from '../api';
+import { showToast } from '../App';
 import PermissionManager from '../features/tenants/components/PermissionManager';
+import ConfirmationModal from '../shared/components/ConfirmationModal';
 
 const TenantDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -34,6 +36,27 @@ const TenantDetailPage = () => {
   );
   const [permissionGroups, setPermissionGroups] = useState<api.PermissionGroup[]>([]);
 
+  // State for reusable confirmation modal
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void | Promise<void>;
+    confirmText?: string;
+    cancelText?: string;
+    type: 'danger' | 'warning' | 'info' | 'success';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    type: 'warning',
+  });
+
+  const closeConfirmModal = () => {
+    setConfirmModal(prev => ({ ...prev, isOpen: false }));
+  };
+
   const loadData = useCallback(async () => {
     if (!id) return;
     try {
@@ -53,10 +76,11 @@ const TenantDetailPage = () => {
       setSavedDisabledCore(new Set(disabledCore));
     } catch (err) {
       console.error(err);
+      showToast(t('details.loadError', { defaultValue: 'Could not load tenant details.' }), 'error');
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   useEffect(() => {
     void loadData();
@@ -113,8 +137,10 @@ const TenantDetailPage = () => {
       setSavedGranted(new Set(granted));
       setLocalDisabledCore(disabledCore);
       setSavedDisabledCore(new Set(disabledCore));
-    } catch (err) {
+      showToast(t('permissions.saveSuccess', { defaultValue: 'Permissions updated successfully.' }), 'success');
+    } catch (err: any) {
       console.error(err);
+      showToast(err.response?.data?.message || t('permissions.saveError', { defaultValue: 'Could not update permissions.' }), 'error');
     } finally {
       setSaving(false);
     }
@@ -123,57 +149,87 @@ const TenantDetailPage = () => {
   const handleResetPermissions = () => {
     setLocalGranted(new Set(savedGranted));
     setLocalDisabledCore(new Set(savedDisabledCore));
+    showToast(t('permissions.resetSuccess', { defaultValue: 'Changes cancelled.' }), 'success');
   };
 
   const handleGrantAll = () => {
-    if (
-      !window.confirm(
-        t('permissions.confirmGrantAll', {
-          defaultValue:
-            'Grant all feature permissions? Changes will be saved only after you click Save.',
-        }),
-      )
-    ) return;
-    handleApplyTemplate(permData?.featurePermissions || []);
+    setConfirmModal({
+      isOpen: true,
+      title: t('permissions.grantAll'),
+      message: t('permissions.confirmGrantAll', {
+        defaultValue: 'Grant all feature permissions? Changes will be saved only after you click Save.',
+      }),
+      type: 'warning',
+      confirmText: t('permissions.grantAll'),
+      cancelText: t('common.cancel'),
+      onConfirm: () => {
+        handleApplyTemplate(permData?.featurePermissions || []);
+        closeConfirmModal();
+      }
+    });
   };
 
   const handleRevokeAll = () => {
-    if (
-      !window.confirm(
-        t('permissions.confirmRevokeAll', {
-          defaultValue:
-            'Revoke all feature permissions? Changes will be saved only after you click Save.',
-        }),
-      )
-    ) return;
-    handleApplyTemplate([]);
+    setConfirmModal({
+      isOpen: true,
+      title: t('permissions.revokeAll'),
+      message: t('permissions.confirmRevokeAll', {
+        defaultValue: 'Revoke all feature permissions? Changes will be saved only after you click Save.',
+      }),
+      type: 'danger',
+      confirmText: t('permissions.revokeAll'),
+      cancelText: t('common.cancel'),
+      onConfirm: () => {
+        handleApplyTemplate([]);
+        closeConfirmModal();
+      }
+    });
   };
 
-  const handleToggleStatus = async () => {
+  const handleToggleStatus = () => {
     if (!id || !tenant) return;
     const nextStatus = tenant.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
     const confirmKey =
       nextStatus === 'SUSPENDED'
         ? 'details.confirmSuspend'
         : 'details.confirmActivate';
-    if (
-      !window.confirm(
-        t(confirmKey, {
-          name: tenant.name,
-          defaultValue: `${nextStatus === 'SUSPENDED' ? 'Suspend' : 'Activate'} ${tenant.name}?`,
-        }),
-      )
-    ) return;
+    const confirmTitle = nextStatus === 'SUSPENDED'
+      ? t('details.suspend', { defaultValue: 'Suspend Tenant' })
+      : t('details.activate', { defaultValue: 'Activate Tenant' });
 
-    setSaving(true);
-    try {
-      const updated = await api.updateTenantStatus(id, nextStatus);
-      setTenant(updated);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSaving(false);
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: confirmTitle,
+      message: t(confirmKey, {
+        name: tenant.name,
+        defaultValue: `${nextStatus === 'SUSPENDED' ? 'Suspend' : 'Activate'} ${tenant.name}?`,
+      }),
+      type: nextStatus === 'SUSPENDED' ? 'danger' : 'success',
+      confirmText: confirmTitle,
+      cancelText: t('common.cancel'),
+      onConfirm: async () => {
+        closeConfirmModal();
+        setSaving(true);
+        try {
+          const updated = await api.updateTenantStatus(id, nextStatus);
+          setTenant(updated);
+          showToast(
+            nextStatus === 'ACTIVE'
+              ? t('details.activateSuccess', { defaultValue: 'Tenant has been activated.' })
+              : t('details.suspendSuccess', { defaultValue: 'Tenant has been suspended.' }),
+            'success'
+          );
+        } catch (err: any) {
+          console.error(err);
+          showToast(
+            err.response?.data?.message || t('details.statusError', { defaultValue: 'Could not change tenant status.' }),
+            'error'
+          );
+        } finally {
+          setSaving(false);
+        }
+      }
+    });
   };
 
   if (loading) return <div className="h-64 flex items-center justify-center"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div></div>;
@@ -265,6 +321,19 @@ const TenantDetailPage = () => {
           hasChanges={hasPermissionChanges}
         />
       </div>
+
+      {/* Global Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={confirmModal.isOpen}
+        onClose={closeConfirmModal}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmText={confirmModal.confirmText}
+        cancelText={confirmModal.cancelText}
+        type={confirmModal.type}
+        isConfirming={saving}
+      />
     </div>
   );
 };
