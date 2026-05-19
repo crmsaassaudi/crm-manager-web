@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { fetchProvisioningStatus, ProvisioningStatus } from '../api';
+import { fetchProvisioningStatus } from '../api';
+import type { ProvisioningStatus } from '../api';
 
 const WS_BASE_URL =
   (import.meta as any).env?.VITE_WS_BASE_URL ||
