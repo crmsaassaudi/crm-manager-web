@@ -1,66 +1,64 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { 
-  Users, 
-  Building2, 
-  HardDrive, 
+import {
+  Users,
+  Building2,
+  HardDrive,
   Activity
 } from 'lucide-react';
 import * as api from '../api';
+import type { DashboardStats } from '../api';
 import { motion } from 'framer-motion';
 
 const DashboardPage = () => {
   const { t } = useTranslation();
-  const [stats, setStats] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    api.fetchDashboardStats()
-      .then(setStats)
-      .catch(() => setStats({ totalTenants: 5, activeUsers: 0, totalStorageUsedMB: 0 }))
-      .finally(() => setLoading(false));
-  }, []);
+  const { data: stats, isLoading } = useQuery<DashboardStats>({
+    queryKey: ['dashboardStats'],
+    queryFn: api.fetchDashboardStats,
+    staleTime: 1000 * 60 * 5,
+  });
 
   const metrics = [
-    { 
-      label: t('dashboard.totalTenants'), 
-      value: stats?.totalTenants || 0, 
-      icon: Building2, 
-      trend: '+12%', 
+    {
+      label: t('dashboard.totalTenants'),
+      value: stats?.totalTenants ?? 0,
+      icon: Building2,
+      trend: '+12%',
       isUp: true,
       color: 'text-blue-600 dark:text-blue-400',
       bg: 'bg-blue-50 dark:bg-blue-900/20'
     },
-    { 
-      label: t('dashboard.activeUsers'), 
-      value: stats?.activeUsers || 0, 
-      icon: Users, 
-      trend: '+5.4%', 
+    {
+      label: t('dashboard.activeUsers'),
+      value: stats?.activeUsers ?? 0,
+      icon: Users,
+      trend: '+5.4%',
       isUp: true,
       color: 'text-emerald-600 dark:text-emerald-400',
       bg: 'bg-emerald-50 dark:bg-emerald-900/20'
     },
-    { 
-      label: t('dashboard.storageUsage'), 
-      value: `${((stats?.totalStorageUsedMB || 0) / 1024).toFixed(1)} GB`, 
-      icon: HardDrive, 
-      trend: '+2.1%', 
+    {
+      label: t('dashboard.storageUsage'),
+      value: `${(((stats?.totalStorageUsedMB) ?? 0) / 1024).toFixed(1)} GB`,
+      icon: HardDrive,
+      trend: '+2.1%',
       isUp: false,
       color: 'text-amber-600 dark:text-amber-400',
       bg: 'bg-amber-50 dark:bg-amber-900/20'
     },
-    { 
-      label: t('dashboard.systemHealth'), 
-      value: '99.9%', 
-      icon: Activity, 
-      trend: 'Optimal', 
+    {
+      label: t('dashboard.systemHealth'),
+      value: stats?.systemHealth ?? '—',
+      icon: Activity,
+      trend: 'Optimal',
       isUp: true,
       color: 'text-indigo-600 dark:text-indigo-400',
       bg: 'bg-indigo-50 dark:bg-indigo-900/20'
     },
   ];
 
-  if (loading) return (
+  if (isLoading) return (
     <div className="h-64 flex items-center justify-center">
       <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
     </div>
@@ -76,7 +74,7 @@ const DashboardPage = () => {
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {metrics.map((m, i) => (
-          <motion.div 
+          <motion.div
             key={m.label}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -122,7 +120,7 @@ const DashboardPage = () => {
                    <span className="text-slate-500 font-medium">{tenant.used} GB / {tenant.limit} GB</span>
                  </div>
                  <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                   <motion.div 
+                   <motion.div
                      initial={{ width: 0 }}
                      animate={{ width: `${(tenant.used / tenant.limit) * 100}%` }}
                      transition={{ duration: 1, ease: 'easeOut' }}
@@ -151,7 +149,7 @@ const DashboardPage = () => {
               { type: 'revoke', user: 'admin', target: 'Acme Corp', time: `4 ${t('dashboard.timeAgo')}` },
             ].map((item, i) => (
               <div key={i} className="flex gap-4">
-                <div className={`w-6 h-6 rounded-lg flex-shrink-0 flex items-center justify-center ${
+                <div className={`w-6 h-6 rounded-lg shrink-0 flex items-center justify-center ${
                   item.type === 'grant' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' :
                   item.type === 'suspend' ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400' :
                   'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'

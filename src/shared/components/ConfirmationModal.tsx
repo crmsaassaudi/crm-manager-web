@@ -12,6 +12,8 @@ interface ConfirmationModalProps {
   cancelText?: string;
   type?: 'danger' | 'warning' | 'info' | 'success';
   isConfirming?: boolean;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
+  children?: React.ReactNode;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -24,6 +26,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   cancelText = 'Cancel',
   type = 'warning',
   isConfirming = false,
+  size = 'sm',
+  children,
 }) => {
   const getIcon = () => {
     switch (type) {
@@ -103,12 +107,13 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <span>{title}</span>
         </div>
       }
-      size="sm"
+      size={size}
       footer={footer}
     >
       <p className="text-[13px] font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
         {message}
       </p>
+      {children}
     </Modal>
   );
 };

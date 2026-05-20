@@ -12,7 +12,7 @@ import {
   Info,
 } from 'lucide-react';
 import * as api from '../api';
-import { showToast } from '../App';
+import { useToast } from '../shared/context/ToastContext';
 import Modal from '../shared/components/Modal';
 import ConfirmationModal from '../shared/components/ConfirmationModal';
 
@@ -30,6 +30,7 @@ const groupPermissions = (permissions: string[]) =>
 
 const PermissionGroupsPage = () => {
   const { t } = useTranslation();
+  const { showToast } = useToast();
   const [catalog, setCatalog] = useState<Catalog>({
     featurePermissions: [],
     corePermissions: [],

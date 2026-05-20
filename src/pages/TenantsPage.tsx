@@ -1,19 +1,31 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import * as api from '../api';
-import { showToast } from '../App';
+import { useToast } from '../shared/context/ToastContext';
 import TenantTable from '../features/tenants/components/TenantTable';
 import ConfirmationModal from '../shared/components/ConfirmationModal';
 
 const TenantsPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [tenants, setTenants] = useState<api.Tenant[]>([]);
-  const [permissionGroups, setPermissionGroups] = useState<api.PermissionGroup[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { showToast } = useToast();
+  const queryClient = useQueryClient();
   const [actionLoading, setActionLoading] = useState(false);
+
+  const { data: tenants = [], isLoading: tenantsLoading } = useQuery({
+    queryKey: ['tenants'],
+    queryFn: api.fetchTenants,
+  });
+
+  const { data: permissionGroups = [], isLoading: groupsLoading } = useQuery({
+    queryKey: ['permissionGroups'],
+    queryFn: api.fetchPermissionGroups,
+  });
+
+  const loading = tenantsLoading || groupsLoading;
 
   // Confirmation Modal state
   const [confirmModal, setConfirmModal] = useState<{
@@ -30,27 +42,6 @@ const TenantsPage = () => {
     onConfirm: () => {},
     type: 'warning',
   });
-
-  const loadData = () => {
-    setLoading(true);
-    Promise.all([
-      api.fetchTenants(),
-      api.fetchPermissionGroups()
-    ])
-      .then(([tenantsData, groupsData]) => {
-        setTenants(tenantsData);
-        setPermissionGroups(groupsData);
-      })
-      .catch((err) => {
-        console.error(err);
-        showToast(t('tenants.loadError', { defaultValue: 'Could not load tenants and group templates.' }), 'error');
-      })
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    loadData();
-  }, []);
 
   const handleBulkAction = async (ids: string[], action: string, data?: any) => {
     if (ids.length === 0) return;
@@ -71,7 +62,7 @@ const TenantsPage = () => {
           try {
             await Promise.all(ids.map(id => api.updateTenantStatus(id, 'SUSPENDED')));
             showToast(t('tenants.bulkSuspendSuccess', { count: ids.length, defaultValue: `Successfully suspended ${ids.length} selected tenant(s).` }), 'success');
-            loadData();
+            await queryClient.invalidateQueries({ queryKey: ['tenants'] });
           } catch (err: any) {
             console.error(err);
             showToast(err.response?.data?.message || t('tenants.bulkSuspendError', { defaultValue: 'Failed to suspend some tenants.' }), 'error');
@@ -92,7 +83,7 @@ const TenantsPage = () => {
           mode: data.mode
         });
         showToast(t('permissionGroups.applySuccessDetailed', { name: groupName, count: ids.length, defaultValue: `Successfully applied permission group "${groupName}" to ${ids.length} tenant(s).` }), 'success');
-        loadData();
+        await queryClient.invalidateQueries({ queryKey: ['tenants'] });
       } catch (err: any) {
         console.error(err);
         showToast(err.response?.data?.message || t('permissionGroups.applyError'), 'error');
@@ -105,8 +96,8 @@ const TenantsPage = () => {
   const handleToggleStatus = (id: string, currentStatus: string) => {
     const nextStatus = currentStatus === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
     const targetTenantName = tenants.find(t => (t._id || t.id) === id)?.name || 'Tenant';
-    const confirmTitle = nextStatus === 'SUSPENDED' 
-      ? t('details.suspend', { defaultValue: 'Suspend Tenant' }) 
+    const confirmTitle = nextStatus === 'SUSPENDED'
+      ? t('details.suspend', { defaultValue: 'Suspend Tenant' })
       : t('details.activate', { defaultValue: 'Activate Tenant' });
 
     setConfirmModal({
@@ -129,7 +120,7 @@ const TenantsPage = () => {
               : t('details.suspendSuccess', { name: targetTenantName, defaultValue: `${targetTenantName} has been suspended.` }),
             'success'
           );
-          loadData();
+          await queryClient.invalidateQueries({ queryKey: ['tenants'] });
         } catch (err: any) {
           console.error(err);
           showToast(err.response?.data?.message || t('details.statusError', { defaultValue: 'Could not change tenant status.' }), 'error');
@@ -161,15 +152,14 @@ const TenantsPage = () => {
           <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
         </div>
       ) : (
-        <TenantTable 
-          tenants={tenants} 
+        <TenantTable
+          tenants={tenants}
           permissionGroups={permissionGroups}
-          onBulkAction={handleBulkAction} 
+          onBulkAction={handleBulkAction}
           onToggleStatus={handleToggleStatus}
         />
       )}
 
-      {/* Reusable Confirmation Modal */}
       <ConfirmationModal
         isOpen={confirmModal.isOpen}
         onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}

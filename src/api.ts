@@ -79,6 +79,20 @@ export type ManagerUser = {
   temporaryPassword?: string;
 };
 
+export type DashboardStats = {
+  totalTenants: number;
+  activeUsers: number;
+  totalStorageUsedMB: number;
+  systemHealth: string;
+};
+
+export type FeaturePermissionResponse = {
+  featurePermissions: string[];
+  corePermissions: string[];
+  grantedFeaturePermissions: string[];
+  disabledCorePermissions: string[];
+};
+
 export type ProvisioningStatus = {
   status: 'QUEUED' | 'PROVISIONING' | 'READY' | 'FAILED';
   currentStep: number;
@@ -88,6 +102,7 @@ export type ProvisioningStatus = {
   redirectUrl?: string;
   error?: string;
   retryable?: boolean;
+  subStepLogs?: string[];
 };
 
 export const clearStoredAccessToken = () => {
@@ -116,8 +131,8 @@ export const updateTenantSubscription = (
   data: { subscriptionPlan?: string; storageQuotaLimitMB?: number },
 ) => api.patch(`/tenants/${id}/subscription`, data).then((r) => r.data);
 
-export const fetchFeaturePermissions = (tenantId: string) =>
-  api.get(`/tenants/${tenantId}/feature-permissions`).then((r) => r.data);
+export const fetchFeaturePermissions = (tenantId: string): Promise<FeaturePermissionResponse> =>
+  api.get<FeaturePermissionResponse>(`/tenants/${tenantId}/feature-permissions`).then((r) => r.data);
 
 export const grantFeaturePermissions = (
   tenantId: string,
@@ -219,8 +234,8 @@ export const inviteCustomerUser = (
     .post(`/onboarding/tenants/${tenantId}/invite`, data)
     .then((r) => r.data);
 
-export const fetchDashboardStats = () =>
-  api.get('/analytics/dashboard').then((r) => r.data);
+export const fetchDashboardStats = (): Promise<DashboardStats> =>
+  api.get<DashboardStats>('/analytics/dashboard').then((r) => r.data);
 
 export type AuditLog = {
   id: string;
