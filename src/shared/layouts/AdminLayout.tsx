@@ -20,6 +20,7 @@ import {
   ScrollText,
   Menu,
   X,
+  ServerCog,
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -29,6 +30,7 @@ interface AuthUser {
   email?: string;
   preferred_username?: string;
   name?: string;
+  platformRole?: string | null;
 }
 
 const AdminLayout: React.FC<{ children: React.ReactNode; user: AuthUser }> = ({
@@ -67,6 +69,8 @@ const AdminLayout: React.FC<{ children: React.ReactNode; user: AuthUser }> = ({
     window.location.href = '/api/auth/logout';
   };
 
+  const isSuperAdmin = user.platformRole === 'SUPER_ADMIN';
+
   const navItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: t('common.dashboard'), path: '/' },
     { id: 'tenants', icon: Users, label: t('common.tenants'), path: '/tenants' },
@@ -75,6 +79,9 @@ const AdminLayout: React.FC<{ children: React.ReactNode; user: AuthUser }> = ({
     { id: 'users', icon: User, label: t('common.managerUsers'), path: '/users' },
     { id: 'audit-logs', icon: ScrollText, label: t('common.auditLogs'), path: '/audit-logs' },
     { id: 'settings', icon: Settings, label: t('common.settings'), path: '/settings' },
+    ...(isSuperAdmin
+      ? [{ id: 'system-settings', icon: ServerCog, label: 'Cấu hình Nền tảng', path: '/system-settings' }]
+      : []),
   ];
 
   const languages = [
@@ -92,7 +99,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode; user: AuthUser }> = ({
             animate={{ opacity: 0.4 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsMobileSidebarOpen(false)}
-            className="fixed inset-0 bg-black z-[45]"
+            className="fixed inset-0 bg-black z-45"
           />
         )}
       </AnimatePresence>
@@ -166,7 +173,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode; user: AuthUser }> = ({
 
       {/* Main Content */}
       <main 
-        className={`flex-1 transition-all duration-300 ${isMobile ? 'pl-0' : (isSidebarCollapsed ? 'pl-16' : 'pl-[220px]')}`}
+        className={`flex-1 transition-all duration-300 ${isMobile ? 'pl-0' : (isSidebarCollapsed ? 'pl-16' : 'pl-55')}`}
       >
         {/* Header */}
         <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#0F172A]/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800/50 h-14 flex items-center px-4 md:px-6 justify-between">
@@ -308,7 +315,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode; user: AuthUser }> = ({
           </div>
         </header>
 
-        <div className="p-4 sm:p-6 max-w-[1400px] mx-auto">
+        <div className="p-4 sm:p-6 max-w-350 mx-auto">
           {children}
         </div>
       </main>

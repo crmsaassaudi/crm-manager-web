@@ -10,22 +10,38 @@ import {
   Shield,
   Activity,
   ChevronRight,
-  Building2
+  Building2,
+  Network,
+  DatabaseBackup,
+  Webhook,
 } from 'lucide-react';
 import * as api from '../api';
 import type { Tenant, FeaturePermissionResponse } from '../api';
 import { useToast } from '../shared/context/ToastContext';
 import PermissionManager from '../features/tenants/components/PermissionManager';
 import PermissionDiffViewer from '../features/tenants/components/PermissionDiffViewer';
+import CustomDomainTab from '../features/tenants/components/CustomDomainTab';
+import DisasterRecoveryTab from '../features/tenants/components/DisasterRecoveryTab';
+import WebhookMonitorTab from '../features/tenants/components/WebhookMonitorTab';
 import ConfirmationModal from '../shared/components/ConfirmationModal';
+
+type TabId = 'permissions' | 'domain' | 'backup' | 'webhooks';
 
 const TenantDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  const TABS: { id: TabId; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
+    { id: 'permissions', label: t('details.tabs.permissions'), icon: Shield },
+    { id: 'domain', label: t('details.tabs.domain'), icon: Network },
+    { id: 'backup', label: t('details.tabs.backup'), icon: DatabaseBackup },
+    { id: 'webhooks', label: t('details.tabs.webhooks'), icon: Webhook },
+  ];
   const { showToast } = useToast();
   const [isPending, startTransition] = useTransition();
 
+  const [activeTab, setActiveTab] = useState<TabId>('permissions');
   const [tenant, setTenant] = useState<Tenant | null>(null);
   const [permData, setPermData] = useState<FeaturePermissionResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -303,6 +319,17 @@ const TenantDetailPage = () => {
                 <span className="flex items-center gap-1.5"><Globe size={14} className="text-slate-400" /> {tenant.alias}</span>
                 <span className="flex items-center gap-1.5"><Crown size={14} className="text-slate-400" /> {tenant.subscriptionPlan}</span>
                 <span className="flex items-center gap-1.5"><HardDrive size={14} className="text-slate-400" /> {tenant.storageQuota?.usedMB ?? 0}/{tenant.storageQuota?.limitMB ?? 0} MB</span>
+                {tenant.customDomain && (
+                  <span className="flex items-center gap-1.5">
+                    <Network size={14} className="text-slate-400" />
+                    <span className="font-mono">{tenant.customDomain}</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${
+                      tenant.customDomainStatus === 'ACTIVE'
+                        ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'
+                        : 'bg-amber-100 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400'
+                    }`}>{tenant.customDomainStatus}</span>
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -329,34 +356,63 @@ const TenantDetailPage = () => {
         </div>
       </div>
 
-      {/* Permission Manager */}
-      <div className="bg-white dark:bg-[#0F172A] rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-8 h-8 rounded-lg bg-primary/5 text-primary flex items-center justify-center">
-            <Shield size={16} />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white">{t('details.accessControl')}</h2>
-            <p className="text-[12px] text-slate-500 font-medium mt-0.5">{t('details.accessControlDesc')}</p>
-          </div>
+      {/* Tabs */}
+      <div className="bg-white dark:bg-[#0F172A] rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        {/* Tab Bar */}
+        <div className="flex border-b border-slate-100 dark:border-slate-800 overflow-x-auto scrollbar-none">
+          {TABS.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-5 py-3.5 text-[13px] font-semibold whitespace-nowrap border-b-2 transition-all ${
+                  isActive
+                    ? 'border-primary text-primary bg-primary/3'
+                    : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/30'
+                }`}
+              >
+                <Icon size={15} />
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
 
-        <PermissionManager
-          corePermissions={permData?.corePermissions ?? []}
-          featurePermissions={permData?.featurePermissions ?? []}
-          grantedPermissions={localGranted}
-          disabledCorePermissions={localDisabledCore}
-          permissionGroups={permissionGroups}
-          onToggle={handleToggle}
-          onToggleCore={handleToggleCore}
-          onGrantAll={handleGrantAll}
-          onRevokeAll={handleRevokeAll}
-          onApplyTemplate={handleApplyTemplate}
-          onSave={handleSavePermissions}
-          onReset={handleResetPermissions}
-          isSaving={isPending}
-          hasChanges={hasPermissionChanges}
-        />
+        {/* Tab Content */}
+        <div className="p-6">
+          {activeTab === 'permissions' && (
+            <PermissionManager
+              corePermissions={permData?.corePermissions ?? []}
+              featurePermissions={permData?.featurePermissions ?? []}
+              grantedPermissions={localGranted}
+              disabledCorePermissions={localDisabledCore}
+              permissionGroups={permissionGroups}
+              onToggle={handleToggle}
+              onToggleCore={handleToggleCore}
+              onGrantAll={handleGrantAll}
+              onRevokeAll={handleRevokeAll}
+              onApplyTemplate={handleApplyTemplate}
+              onSave={handleSavePermissions}
+              onReset={handleResetPermissions}
+              isSaving={isPending}
+              hasChanges={hasPermissionChanges}
+            />
+          )}
+
+          {activeTab === 'domain' && (
+            <CustomDomainTab tenantId={tenant.id} tenantAlias={tenant.alias} />
+          )}
+
+          {activeTab === 'backup' && (
+            <DisasterRecoveryTab tenantId={tenant.id} tenantAlias={tenant.alias} />
+          )}
+
+          {activeTab === 'webhooks' && (
+            <WebhookMonitorTab tenantId={tenant.id} />
+          )}
+        </div>
       </div>
 
       {/* Global Confirmation Modal */}

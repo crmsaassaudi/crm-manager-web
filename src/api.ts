@@ -55,6 +55,8 @@ export type Tenant = {
   disabledCorePermissions?: string[] | null;
   createdAt?: string;
   storageQuota?: { usedMB: number; limitMB: number };
+  customDomain?: string | null;
+  customDomainStatus?: 'NONE' | 'DNS_PENDING' | 'SSL_ISSUING' | 'ACTIVE';
 };
 
 export type PermissionGroup = {
@@ -260,6 +262,160 @@ export type AuditLogListResponse = {
   limit: number;
   totalPages: number;
 };
+
+// ─── Custom Domain ───
+
+export type CustomDomainConfig = {
+  tenantId: string;
+  tenantAlias: string;
+  customDomain: string | null;
+  customDomainStatus: 'NONE' | 'DNS_PENDING' | 'SSL_ISSUING' | 'ACTIVE';
+  dnsRecords: { type: string; name: string; value: string; ttl: number }[];
+};
+
+export const fetchCustomDomain = (tenantId: string): Promise<CustomDomainConfig> =>
+  api.get<CustomDomainConfig>(`/tenants/${tenantId}/custom-domain`).then((r) => r.data);
+
+export const setCustomDomain = (tenantId: string, domain: string) =>
+  api.put(`/tenants/${tenantId}/custom-domain`, { domain }).then((r) => r.data);
+
+export const removeCustomDomain = (tenantId: string) =>
+  api.delete(`/tenants/${tenantId}/custom-domain`).then((r) => r.data);
+
+export const verifyCustomDomain = (
+  tenantId: string,
+): Promise<{ verified: boolean; status: string; message: string }> =>
+  api.post(`/tenants/${tenantId}/custom-domain/verify`).then((r) => r.data);
+
+// ─── Disaster Recovery ───
+
+export type BackupRecord = {
+  id: string;
+  tenantId: string;
+  tenantAlias: string;
+  fileName: string;
+  sizeBytes: number;
+  status: 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
+  initiatedBy: string;
+  error?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export const fetchBackups = (tenantId: string): Promise<BackupRecord[]> =>
+  api.get<BackupRecord[]>(`/tenants/${tenantId}/backups`).then((r) => r.data);
+
+export const createBackup = (tenantId: string): Promise<BackupRecord> =>
+  api.post<BackupRecord>(`/tenants/${tenantId}/backups`).then((r) => r.data);
+
+export const restoreBackup = (
+  tenantId: string,
+  backupId: string,
+  confirmationAlias: string,
+): Promise<{ success: boolean; backupId: string; tenantAlias: string }> =>
+  api
+    .post(`/tenants/${tenantId}/backups/${backupId}/restore`, {
+      confirmationAlias,
+    })
+    .then((r) => r.data);
+
+// ─── System Settings ───
+
+export type SystemSettings = {
+  id: string;
+  maintenanceMode: {
+    enabled: boolean;
+    enabledAt: string | null;
+    enabledBy: string | null;
+    whitelistedIPs: string[];
+  };
+  emergencyBanner: {
+    enabled: boolean;
+    title: string;
+    message: string;
+    color: 'yellow' | 'red';
+    activatedAt: string | null;
+    activatedBy: string | null;
+  };
+};
+
+export const fetchSystemSettings = (): Promise<SystemSettings> =>
+  api.get<SystemSettings>('/system-settings').then((r) => r.data);
+
+export const toggleMaintenance = (
+  enabled: boolean,
+  whitelistedIPs?: string[],
+): Promise<SystemSettings> =>
+  api
+    .patch<SystemSettings>('/system-settings/maintenance', {
+      enabled,
+      whitelistedIPs,
+    })
+    .then((r) => r.data);
+
+export const updateEmergencyBanner = (data: {
+  enabled: boolean;
+  title?: string;
+  message?: string;
+  color?: 'yellow' | 'red';
+}): Promise<SystemSettings> =>
+  api
+    .patch<SystemSettings>('/system-settings/emergency-banner', data)
+    .then((r) => r.data);
+
+// ─── Webhook Monitor ───
+
+export type WebhookStat = {
+  webhookId: string;
+  name: string;
+  url: string;
+  events: string[];
+  status: 'ACTIVE' | 'INACTIVE';
+  totalDeliveries: number;
+  failedDeliveries: number;
+  successRate: number;
+};
+
+export type WebhookStatsResponse = {
+  tenantId: string;
+  tenantAlias: string;
+  webhooks: WebhookStat[];
+};
+
+export type WebhookDelivery = {
+  id: string;
+  tenantId: string;
+  webhookConfigId: string;
+  webhookUrl: string;
+  eventType: string;
+  payload: Record<string, unknown>;
+  status: 'SUCCESS' | 'FAILED' | 'PENDING';
+  responseCode?: number | null;
+  durationMs?: number | null;
+  error?: string | null;
+  createdAt: string;
+};
+
+export const fetchWebhookStats = (tenantId: string): Promise<WebhookStatsResponse> =>
+  api.get<WebhookStatsResponse>(`/tenants/${tenantId}/webhooks/stats`).then((r) => r.data);
+
+export const fetchWebhookDeliveries = (
+  tenantId: string,
+  webhookConfigId: string,
+): Promise<WebhookDelivery[]> =>
+  api
+    .get<WebhookDelivery[]>(
+      `/tenants/${tenantId}/webhooks/${webhookConfigId}/deliveries`,
+    )
+    .then((r) => r.data);
+
+export const resendWebhookDelivery = (
+  tenantId: string,
+  deliveryId: string,
+): Promise<{ queued: boolean; deliveryId: string }> =>
+  api
+    .post(`/tenants/${tenantId}/webhooks/${deliveryId}/resend`)
+    .then((r) => r.data);
 
 export const fetchAuditLogs = (params: {
   targetId?: string;

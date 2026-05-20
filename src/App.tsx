@@ -10,6 +10,7 @@ import PermissionGroupsPage from './pages/PermissionGroupsPage';
 import ManagerUsersPage from './pages/ManagerUsersPage';
 import CustomerOnboardingPage from './pages/CustomerOnboardingPage';
 import AuditLogPage from './pages/AuditLogPage';
+import SystemSettingsPage from './pages/SystemSettingsPage';
 import { Shield, ArrowRight, Zap, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -19,6 +20,7 @@ type AuthUser = {
   email?: string;
   preferred_username?: string;
   name?: string;
+  platformRole?: string | null;
 };
 
 // ─── Login Screen ───
@@ -131,6 +133,9 @@ const AppContent = () => {
           <Route path="/users" element={<ManagerUsersPage />} />
           <Route path="/onboarding" element={<CustomerOnboardingPage />} />
           <Route path="/audit-logs" element={<AuditLogPage />} />
+          {user.platformRole === 'SUPER_ADMIN' && (
+            <Route path="/system-settings" element={<SystemSettingsPage />} />
+          )}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AdminLayout>
