@@ -22,6 +22,9 @@ const STATUS_COLOR = {
   FAILED: 'text-rose-600 dark:text-rose-400',
 };
 
+const DISASTER_RECOVERY_ENABLED =
+  import.meta.env.VITE_DISASTER_RECOVERY_FEATURE_ENABLED === 'true';
+
 const formatBytes = (bytes: number) => {
   if (bytes === 0) return '—';
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -50,6 +53,11 @@ const DisasterRecoveryTab = ({ tenantId, tenantAlias }: Props) => {
   }, [tenantId]);
 
   const handleCreateBackup = () => {
+    if (!DISASTER_RECOVERY_ENABLED) {
+      showToast('Backup and restore are disabled until production snapshot storage is configured.', 'warning');
+      return;
+    }
+
     startTransition(async () => {
       try {
         await api.createBackup(tenantId);
@@ -67,6 +75,10 @@ const DisasterRecoveryTab = ({ tenantId, tenantAlias }: Props) => {
 
   const handleRestore = async () => {
     if (!restoreTarget) return;
+    if (!DISASTER_RECOVERY_ENABLED) {
+      showToast('Backup and restore are disabled until production snapshot storage is configured.', 'warning');
+      return;
+    }
     if (confirmAlias !== tenantAlias) {
       showToast(t('disasterRecovery.aliasError'), 'error');
       return;
@@ -101,13 +113,30 @@ const DisasterRecoveryTab = ({ tenantId, tenantAlias }: Props) => {
         </div>
         <button
           onClick={handleCreateBackup}
-          disabled={isPending}
+          disabled={isPending || !DISASTER_RECOVERY_ENABLED}
+          title={
+            DISASTER_RECOVERY_ENABLED
+              ? undefined
+              : 'Disabled until production snapshot storage is configured'
+          }
           className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-[13px] font-semibold rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors shadow-sm shadow-primary/20"
         >
           <DatabaseBackup size={14} />
           {isPending ? t('disasterRecovery.creating') : t('disasterRecovery.triggerBackup')}
         </button>
       </div>
+
+      {!DISASTER_RECOVERY_ENABLED && (
+        <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
+          <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+          <div className="space-y-1">
+            <p className="text-[13px] font-semibold">Backup and restore are disabled.</p>
+            <p className="text-[12px]">
+              Production snapshot storage and restore execution are not configured yet.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Backups Table */}
       {backups.length === 0 ? (
@@ -155,7 +184,13 @@ const DisasterRecoveryTab = ({ tenantId, tenantAlias }: Props) => {
                       {backup.status === 'COMPLETED' && (
                         <button
                           onClick={() => { setRestoreTarget(backup); setConfirmAlias(''); }}
-                          className="flex items-center gap-1 text-[12px] font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-700 transition-colors"
+                          disabled={!DISASTER_RECOVERY_ENABLED}
+                          title={
+                            DISASTER_RECOVERY_ENABLED
+                              ? undefined
+                              : 'Disabled until production restore execution is configured'
+                          }
+                          className="flex items-center gap-1 text-[12px] font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           <RotateCcw size={12} />
                           {t('disasterRecovery.restore')}

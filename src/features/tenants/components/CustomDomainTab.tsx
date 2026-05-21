@@ -47,6 +47,11 @@ const CustomDomainTab = ({ tenantId, tenantAlias }: Props) => {
 
   const handleSave = () => {
     if (!domainInput.trim()) return;
+    if (!config?.featureEnabled) {
+      showToast('Custom domains are disabled until DNS, routing, and SSL automation are configured.', 'warning');
+      return;
+    }
+
     startTransition(async () => {
       try {
         await api.setCustomDomain(tenantId, domainInput.trim());
@@ -61,6 +66,11 @@ const CustomDomainTab = ({ tenantId, tenantAlias }: Props) => {
   };
 
   const handleVerify = () => {
+    if (!config?.featureEnabled) {
+      showToast('Custom domains are disabled until DNS, routing, and SSL automation are configured.', 'warning');
+      return;
+    }
+
     startTransition(async () => {
       try {
         const result = await api.verifyCustomDomain(tenantId);
@@ -107,6 +117,7 @@ const CustomDomainTab = ({ tenantId, tenantAlias }: Props) => {
   const statusKey = (config?.customDomainStatus ?? 'NONE') as keyof typeof STATUS_ICON;
   const StatusIcon = STATUS_ICON[statusKey];
   const statusStyle = STATUS_COLOR[statusKey];
+  const customDomainEnabled = config?.featureEnabled ?? false;
 
   return (
     <div className="space-y-6">
@@ -123,6 +134,18 @@ const CustomDomainTab = ({ tenantId, tenantAlias }: Props) => {
         </div>
       </div>
 
+      {!customDomainEnabled && (
+        <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
+          <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+          <div className="space-y-1">
+            <p className="text-[13px] font-semibold">Custom domains are disabled.</p>
+            <p className="text-[12px]">
+              DNS verification, routing, and SSL automation must be configured before activation.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Domain Input */}
       <div className="space-y-3">
         <label className="block text-[13px] font-semibold text-slate-700 dark:text-slate-300">
@@ -136,12 +159,13 @@ const CustomDomainTab = ({ tenantId, tenantAlias }: Props) => {
               value={domainInput}
               onChange={(e) => setDomainInput(e.target.value)}
               placeholder={t('customDomain.domainPlaceholder')}
+              disabled={!customDomainEnabled}
               className="w-full pl-9 pr-4 py-2 text-[13px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none font-mono"
             />
           </div>
           <button
             onClick={handleSave}
-            disabled={isPending || !domainInput.trim()}
+            disabled={isPending || !domainInput.trim() || !customDomainEnabled}
             className="px-4 py-2 bg-primary text-white text-[13px] font-semibold rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
           >
             {isPending ? t('customDomain.saving') : t('customDomain.save')}
@@ -170,7 +194,7 @@ const CustomDomainTab = ({ tenantId, tenantAlias }: Props) => {
             </h3>
             <button
               onClick={handleVerify}
-              disabled={isPending}
+              disabled={isPending || !customDomainEnabled}
               className="flex items-center gap-1.5 text-[12px] font-semibold text-primary hover:text-primary/80 disabled:opacity-50 transition-colors"
             >
               <RefreshCw size={12} className={isPending ? 'animate-spin' : ''} />

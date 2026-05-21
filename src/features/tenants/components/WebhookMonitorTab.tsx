@@ -79,8 +79,13 @@ const WebhookMonitorTab = ({ tenantId }: Props) => {
   const handleResend = (deliveryId: string, webhookId: string) => {
     startTransition(async () => {
       try {
-        await api.resendWebhookDelivery(tenantId, deliveryId);
-        showToast(t('webhookMonitor.resendSuccess'), 'success');
+        const result = await api.resendWebhookDelivery(tenantId, deliveryId);
+        showToast(
+          result.delivered
+            ? t('webhookMonitor.resendDelivered', { defaultValue: 'Delivery sent successfully.' })
+            : t('webhookMonitor.resendSuccess'),
+          'success',
+        );
         const data = await api.fetchWebhookDeliveries(tenantId, webhookId);
         setDeliveries((prev) => ({ ...prev, [webhookId]: data }));
       } catch (err: any) {

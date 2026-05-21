@@ -268,6 +268,7 @@ export type AuditLogListResponse = {
 export type CustomDomainConfig = {
   tenantId: string;
   tenantAlias: string;
+  featureEnabled?: boolean;
   customDomain: string | null;
   customDomainStatus: 'NONE' | 'DNS_PENDING' | 'SSL_ISSUING' | 'ACTIVE';
   dnsRecords: { type: string; name: string; value: string; ttl: number }[];
@@ -284,7 +285,7 @@ export const removeCustomDomain = (tenantId: string) =>
 
 export const verifyCustomDomain = (
   tenantId: string,
-): Promise<{ verified: boolean; status: string; message: string }> =>
+): Promise<{ verified: boolean; dnsVerified?: boolean; status: string; message: string }> =>
   api.post(`/tenants/${tenantId}/custom-domain/verify`).then((r) => r.data);
 
 // ─── Disaster Recovery ───
@@ -412,7 +413,14 @@ export const fetchWebhookDeliveries = (
 export const resendWebhookDelivery = (
   tenantId: string,
   deliveryId: string,
-): Promise<{ queued: boolean; deliveryId: string }> =>
+): Promise<{
+  queued: boolean;
+  delivered?: boolean;
+  deliveryId: string;
+  status?: string;
+  responseCode?: number;
+  durationMs?: number;
+}> =>
   api
     .post(`/tenants/${tenantId}/webhooks/${deliveryId}/resend`)
     .then((r) => r.data);
