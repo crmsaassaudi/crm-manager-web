@@ -78,11 +78,11 @@ const CustomerOnboardingPage = () => {
           plan: form.plan,
         });
         setProvisioningId(result.provisioningId);
-        setMessage(t('onboarding.provisioningQueued', { id: result.provisioningId, defaultValue: `Provisioning enqueued: ${result.provisioningId}` }));
-        showToast(t('onboarding.provisioningQueuedToast', { defaultValue: 'Tenant provisioning enqueued successfully.' }), 'success');
+        setMessage(t('onboarding.provisioningQueued', { id: result.provisioningId }));
+        showToast(t('onboarding.provisioningQueuedToast'), 'success');
       } catch (error: any) {
-        setMessage(error.response?.data?.message || t('onboarding.onboardingError', { defaultValue: 'Onboarding error occurred.' }));
-        showToast(error.response?.data?.message || t('onboarding.onboardingError', { defaultValue: 'Onboarding error occurred.' }), 'error');
+        setMessage(error.response?.data?.message || t('onboarding.onboardingError'));
+        showToast(error.response?.data?.message || t('onboarding.onboardingError'), 'error');
       }
     });
   };
@@ -93,10 +93,10 @@ const CustomerOnboardingPage = () => {
     setMessage(null);
     try {
       await api.retryProvisioning(provisioningId);
-      setMessage(t('onboarding.retryQueued', { defaultValue: 'Safe idempotency retry successfully enqueued.' }));
-      showToast(t('onboarding.retryQueuedToast', { defaultValue: 'Idempotent retry successfully triggered!' }), 'success');
+      setMessage(t('onboarding.retryQueued'));
+      showToast(t('onboarding.retryQueuedToast'), 'success');
     } catch (error: any) {
-      showToast(error.response?.data?.message || t('onboarding.retryError', { defaultValue: 'Could not trigger retry.' }), 'error');
+      showToast(error.response?.data?.message || t('onboarding.retryError'), 'error');
     } finally {
       setRetrying(false);
     }
@@ -111,11 +111,11 @@ const CustomerOnboardingPage = () => {
         role: 'OWNER',
       });
       setInviteSent(true);
-      setMessage(t('onboarding.inviteSentSuccess', { defaultValue: 'Invitation sent successfully.' }));
-      showToast(t('onboarding.inviteSentSuccess', { defaultValue: 'Invitation sent successfully.' }), 'success');
+      setMessage(t('onboarding.inviteSentSuccess'));
+      showToast(t('onboarding.inviteSentSuccess'), 'success');
     } catch (error: any) {
-      setMessage(error.response?.data?.message || t('onboarding.inviteError', { defaultValue: 'Could not send invitation.' }));
-      showToast(error.response?.data?.message || t('onboarding.inviteError', { defaultValue: 'Could not send invitation.' }), 'error');
+      setMessage(error.response?.data?.message || t('onboarding.inviteError'));
+      showToast(error.response?.data?.message || t('onboarding.inviteError'), 'error');
     } finally {
       setInviteSending(false);
     }
@@ -129,10 +129,10 @@ const CustomerOnboardingPage = () => {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            {t('onboarding.title', { defaultValue: 'Customer Onboarding' })}
+            {t('onboarding.title')}
           </h1>
           <p className="text-[13px] text-slate-500 font-medium mt-1">
-            {t('onboarding.subtitle', { defaultValue: 'Provision workspaces and channels for onboarding customers.' })}
+            {t('onboarding.subtitle')}
           </p>
         </div>
         {message && (
@@ -151,10 +151,10 @@ const CustomerOnboardingPage = () => {
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                {t('onboarding.newCustomer', { defaultValue: 'New Customer' })}
+                {t('onboarding.newCustomer')}
               </h2>
               <p className="text-[12px] text-slate-500">
-                {t('onboarding.provisioningFlow', { defaultValue: 'Trigger provisioning sagas' })}
+                {t('onboarding.provisioningFlow')}
               </p>
             </div>
           </div>
@@ -166,7 +166,7 @@ const CustomerOnboardingPage = () => {
                 value={form.companyName}
                 onChange={(event) => setForm((c) => ({ ...c, companyName: event.target.value }))}
                 required
-                placeholder={t('onboarding.companyName', { defaultValue: 'Company Name' })}
+                placeholder={t('onboarding.companyName')}
                 className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900 text-slate-900 dark:text-white"
               />
             </div>
@@ -176,7 +176,7 @@ const CustomerOnboardingPage = () => {
                 value={form.adminFullName}
                 onChange={(event) => setForm((c) => ({ ...c, adminFullName: event.target.value }))}
                 required
-                placeholder={t('onboarding.ownerName', { defaultValue: 'Owner Name' })}
+                placeholder={t('onboarding.ownerName')}
                 className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900 text-slate-900 dark:text-white"
               />
             </div>
@@ -187,7 +187,7 @@ const CustomerOnboardingPage = () => {
                 onChange={(event) => setForm((c) => ({ ...c, adminEmail: event.target.value }))}
                 type="email"
                 required
-                placeholder={t('onboarding.ownerEmail', { defaultValue: 'Owner Email' })}
+                placeholder={t('onboarding.ownerEmail')}
                 className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900 text-slate-900 dark:text-white"
               />
             </div>
@@ -207,7 +207,7 @@ const CustomerOnboardingPage = () => {
                 onChange={(event) => setForm((c) => ({ ...c, autoInvite: event.target.checked }))}
                 className="cursor-pointer"
               />
-              {t('onboarding.autoInvite', { defaultValue: 'Auto-invite user once ready' })}
+              {t('onboarding.autoInvite')}
             </label>
             <button
               type="submit"
@@ -215,7 +215,7 @@ const CustomerOnboardingPage = () => {
               className="w-full h-10 rounded-lg bg-primary hover:bg-primary/95 text-white text-[13px] font-bold disabled:opacity-50 flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer shadow-lg shadow-primary/20"
             >
               {isPending ? <Loader2 size={15} className="animate-spin" /> : <ArrowRight size={15} />}
-              {t('onboarding.startButton', { defaultValue: 'Start Onboarding' })}
+              {t('onboarding.startButton')}
             </button>
           </form>
         </section>
@@ -226,10 +226,10 @@ const CustomerOnboardingPage = () => {
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                  {t('onboarding.provisioningStatus', { defaultValue: 'Provisioning Status' })}
+                  {t('onboarding.provisioningStatus')}
                 </h2>
                 <p className="text-[12px] text-slate-500 mt-1 font-mono">
-                  {provisioningId || t('onboarding.noJobRunning', { defaultValue: 'No active job running' })}
+                  {provisioningId || t('onboarding.noJobRunning')}
                 </p>
               </div>
               <div className={`rounded-lg px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider ${
@@ -239,7 +239,7 @@ const CustomerOnboardingPage = () => {
                     ? 'bg-rose-50 text-rose-600 dark:bg-rose-500/10'
                     : 'bg-slate-100 text-slate-500 dark:bg-slate-800'
               }`}>
-                {status?.status || t('onboarding.idle', { defaultValue: 'Idle' })}
+                {status?.status || t('onboarding.idle')}
               </div>
             </div>
 
@@ -255,12 +255,12 @@ const CustomerOnboardingPage = () => {
               </div>
               <div className="min-w-0 flex-1">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white truncate">
-                  {status?.stepLabel || t('onboarding.readyDesc', { defaultValue: 'Ready to provision' })}
+                  {status?.stepLabel || t('onboarding.readyDesc')}
                 </h3>
                 <p className="mt-1 text-[13px] text-slate-500">
                   {status
-                    ? t('onboarding.stepLabel', { current: status.currentStep, total: status.totalSteps, defaultValue: `Step ${status.currentStep} of ${status.totalSteps}` })
-                    : t('onboarding.submitFormDesc', { defaultValue: 'Submit form to start creation' })}
+                    ? t('onboarding.stepLabel', { current: status.currentStep, total: status.totalSteps })
+                    : t('onboarding.submitFormDesc')}
                 </p>
               </div>
             </div>
@@ -284,7 +284,7 @@ const CustomerOnboardingPage = () => {
                     target="_blank"
                     rel="noreferrer"
                   >
-                    {t('onboarding.openLogin', { defaultValue: 'Launch Workspace' })}
+                    {t('onboarding.openLogin')}
                     <ArrowRight size={12} />
                   </a>
                 )}
@@ -302,7 +302,7 @@ const CustomerOnboardingPage = () => {
                   <div key={index} className="leading-relaxed text-emerald-400/90">{log}</div>
                 ))
               ) : (
-                <p className="text-slate-500 italic">Chờ khởi tạo tiến trình để xuất log hạ tầng...</p>
+                <p className="text-slate-500 italic">{t('onboarding.logPlaceholder')}</p>
               )}
             </div>
           </div>
@@ -314,7 +314,7 @@ const CustomerOnboardingPage = () => {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <h3 className="text-[14px] font-bold text-emerald-700 dark:text-emerald-300">
-                      {t('onboarding.readyTitle', { defaultValue: 'Workspace Ready!' })}
+                      {t('onboarding.readyTitle')}
                     </h3>
                     <p className="text-[12px] text-emerald-700/80 dark:text-emerald-300/80">
                       Tenant id: {status.tenantId}
@@ -326,7 +326,7 @@ const CustomerOnboardingPage = () => {
                     className="h-9 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-[12px] font-bold text-white disabled:opacity-60 flex items-center gap-2 px-4 shadow-sm cursor-pointer"
                   >
                     {inviteSending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-                    {inviteSent ? t('onboarding.inviteSent', { defaultValue: 'Invite Sent' }) : t('onboarding.sendInvite', { defaultValue: 'Send Invite' })}
+                    {inviteSent ? t('onboarding.inviteSent') : t('onboarding.sendInvite')}
                   </button>
                 </div>
               </div>
@@ -336,10 +336,10 @@ const CustomerOnboardingPage = () => {
             {status?.status === 'FAILED' && (
               <div className="mt-6 rounded-xl border border-rose-200 bg-rose-50 p-4 dark:border-rose-900/60 dark:bg-rose-500/10">
                 <h3 className="text-[14px] font-bold text-rose-700 dark:text-rose-300">
-                  {t('onboarding.failedTitle', { defaultValue: 'Setup Failed' })}
+                  {t('onboarding.failedTitle')}
                 </h3>
                 <p className="text-[12px] text-rose-700/80 dark:text-rose-300/80 mt-1">
-                  {status.error || 'Workspace setup failed. Our team has been notified.'}
+                  {status.error || t('onboarding.failedDesc')}
                 </p>
                 {status.retryable && (
                   <button
@@ -349,7 +349,7 @@ const CustomerOnboardingPage = () => {
                     className="mt-4 w-full h-9 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[12px] font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer shadow-md shadow-rose-600/10"
                   >
                     {retrying ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} className="shrink-0" />}
-                    {t('onboarding.safeRetry', { defaultValue: 'Safe Idempotency Retry' })}
+                    {t('onboarding.safeRetry')}
                   </button>
                 )}
               </div>

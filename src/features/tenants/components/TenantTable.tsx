@@ -371,13 +371,13 @@ const TenantTable: React.FC<TenantTableProps> = ({
         <div className="space-y-4">
           <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200/40 dark:border-slate-800/40 text-[12px]">
             <p className="text-slate-600 dark:text-slate-300 leading-relaxed font-semibold">
-              Applying to <span className="text-primary font-black">{targetTenantIds.length}</span> selected tenant(s).
+              {t('permissionGroups.applyingTo', { count: targetTenantIds.length })}
             </p>
           </div>
 
           <div className="space-y-1.5">
             <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-              Select Permission Group
+              {t('permissionGroups.selectGroup')}
             </label>
             <select
               value={selectedGroupId}
@@ -399,7 +399,7 @@ const TenantTable: React.FC<TenantTableProps> = ({
               <p className="text-[11px] text-slate-500 mt-1">{activeSelectedGroup.description || t('permissionGroups.noDescription')}</p>
               <div className="mt-2.5 flex items-center gap-1.5">
                 <span className="px-1.5 py-0.5 rounded bg-primary/5 text-primary text-[10px] font-mono font-bold border border-primary/10">
-                  {activeSelectedGroup.permissions.length} feature permissions
+                  {t('permissionGroups.featureCount', { count: activeSelectedGroup.permissions.length })}
                 </span>
               </div>
             </div>
@@ -407,7 +407,7 @@ const TenantTable: React.FC<TenantTableProps> = ({
 
           <div className="space-y-2">
             <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-              Apply Mode
+              {t('permissionGroups.applyMode')}
             </label>
             <div className="grid grid-cols-2 gap-2.5">
               {(['merge', 'replace'] as const).map((mode) => (
@@ -425,9 +425,9 @@ const TenantTable: React.FC<TenantTableProps> = ({
                     {mode === 'replace' ? t('permissionGroups.replace') : t('permissionGroups.merge')}
                   </span>
                   <span className="text-[9px] font-medium lowercase tracking-tighter opacity-70">
-                    {mode === 'replace' 
-                      ? 'overwrites all current permissions' 
-                      : 'combines with current permissions'}
+                    {mode === 'replace'
+                      ? t('permissionGroups.replaceDesc')
+                      : t('permissionGroups.mergeDesc')}
                   </span>
                 </button>
               ))}

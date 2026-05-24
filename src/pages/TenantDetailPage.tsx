@@ -91,7 +91,7 @@ const TenantDetailPage = () => {
       setSavedDisabledCore(new Set(disabledCore));
     } catch (err) {
       console.error(err);
-      showToast(t('details.loadError', { defaultValue: 'Could not load tenant details.' }), 'error');
+      showToast(t('details.loadError'), 'error');
     } finally {
       setLoading(false);
     }
@@ -159,13 +159,12 @@ const TenantDetailPage = () => {
     ) {
       setConfirmModal({
         isOpen: true,
-        title: t('permissions.overrideTitle', { defaultValue: 'Configuration Drift Alert' }),
+        title: t('permissions.overrideTitle'),
         message: t('permissions.confirmOverride', {
           groupName: initialMatchingGroup.name,
-          defaultValue: `Tenant này đang không tuân thủ theo Group gốc "${initialMatchingGroup.name}", bạn có chắc chắn muốn tách riêng?`
         }),
         type: 'warning',
-        confirmText: t('permissions.decoupleConfirm', { defaultValue: 'Yes, Decouple & Save' }),
+        confirmText: t('permissions.decoupleConfirm'),
         cancelText: t('common.cancel'),
         showDiffViewer: true,
         onConfirm: () => {
@@ -191,10 +190,10 @@ const TenantDetailPage = () => {
         setSavedGranted(new Set(granted));
         setLocalDisabledCore(disabledCore);
         setSavedDisabledCore(new Set(disabledCore));
-        showToast(t('permissions.saveSuccess', { defaultValue: 'Permissions updated successfully.' }), 'success');
+        showToast(t('permissions.saveSuccess'), 'success');
       } catch (err: any) {
         console.error(err);
-        showToast(err.response?.data?.message || t('permissions.saveError', { defaultValue: 'Could not update permissions.' }), 'error');
+        showToast(err.response?.data?.message || t('permissions.saveError'), 'error');
       }
     });
   };
@@ -202,16 +201,14 @@ const TenantDetailPage = () => {
   const handleResetPermissions = () => {
     setLocalGranted(new Set(savedGranted));
     setLocalDisabledCore(new Set(savedDisabledCore));
-    showToast(t('permissions.resetSuccess', { defaultValue: 'Changes cancelled.' }), 'success');
+    showToast(t('permissions.resetSuccess'), 'success');
   };
 
   const handleGrantAll = () => {
     setConfirmModal({
       isOpen: true,
       title: t('permissions.grantAll'),
-      message: t('permissions.confirmGrantAll', {
-        defaultValue: 'Grant all feature permissions? Changes will be saved only after you click Save.',
-      }),
+      message: t('permissions.confirmGrantAll'),
       type: 'warning',
       confirmText: t('permissions.grantAll'),
       cancelText: t('common.cancel'),
@@ -226,9 +223,7 @@ const TenantDetailPage = () => {
     setConfirmModal({
       isOpen: true,
       title: t('permissions.revokeAll'),
-      message: t('permissions.confirmRevokeAll', {
-        defaultValue: 'Revoke all feature permissions? Changes will be saved only after you click Save.',
-      }),
+      message: t('permissions.confirmRevokeAll'),
       type: 'danger',
       confirmText: t('permissions.revokeAll'),
       cancelText: t('common.cancel'),
@@ -244,16 +239,13 @@ const TenantDetailPage = () => {
     const nextStatus = tenant.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
     const confirmKey = nextStatus === 'SUSPENDED' ? 'details.confirmSuspend' : 'details.confirmActivate';
     const confirmTitle = nextStatus === 'SUSPENDED'
-      ? t('details.suspend', { defaultValue: 'Suspend Tenant' })
-      : t('details.activate', { defaultValue: 'Activate Tenant' });
+      ? t('details.suspend')
+      : t('details.activate');
 
     setConfirmModal({
       isOpen: true,
       title: confirmTitle,
-      message: t(confirmKey, {
-        name: tenant.name,
-        defaultValue: `${nextStatus === 'SUSPENDED' ? 'Suspend' : 'Activate'} ${tenant.name}?`,
-      }),
+      message: t(confirmKey, { name: tenant.name }),
       type: nextStatus === 'SUSPENDED' ? 'danger' : 'success',
       confirmText: confirmTitle,
       cancelText: t('common.cancel'),
@@ -265,14 +257,14 @@ const TenantDetailPage = () => {
             setTenant(updated);
             showToast(
               nextStatus === 'ACTIVE'
-                ? t('details.activateSuccess', { defaultValue: 'Tenant has been activated.' })
-                : t('details.suspendSuccess', { defaultValue: 'Tenant has been suspended.' }),
+                ? t('details.activateSuccess', { name: tenant.name })
+                : t('details.suspendSuccess', { name: tenant.name }),
               'success'
             );
           } catch (err: any) {
             console.error(err);
             showToast(
-              err.response?.data?.message || t('details.statusError', { defaultValue: 'Could not change tenant status.' }),
+              err.response?.data?.message || t('details.statusError'),
               'error'
             );
           }
@@ -286,7 +278,7 @@ const TenantDetailPage = () => {
       <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
     </div>
   );
-  if (!tenant) return <div>Tenant not found</div>;
+  if (!tenant) return <div>{t('details.tenantNotFound')}</div>;
 
   return (
     <div className="space-y-6">

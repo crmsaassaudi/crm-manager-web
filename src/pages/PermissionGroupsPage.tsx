@@ -65,7 +65,7 @@ const PermissionGroupsPage = () => {
       setGroups(groupsData);
     } catch (error) {
       console.error(error);
-      showToast(t('permissionGroups.loadError', { defaultValue: 'Could not load permission data.' }), 'error');
+      showToast(t('permissionGroups.loadError'), 'error');
     } finally {
       setLoading(false);
     }
@@ -220,7 +220,7 @@ const PermissionGroupsPage = () => {
               type="text"
               value={groupSearch}
               onChange={(e) => setGroupSearch(e.target.value)}
-              placeholder={t('common.search', { defaultValue: 'Search...' })}
+              placeholder={t('common.search')}
               className="w-full bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-[13px] focus:ring-1 focus:ring-primary/30 outline-none shadow-sm text-slate-900 dark:text-white"
             />
           </div>
@@ -239,10 +239,10 @@ const PermissionGroupsPage = () => {
               }`}
             >
               {filter === 'ALL'
-                ? t('common.allStatus', { defaultValue: 'All Types' })
+                ? t('common.allStatus')
                 : filter === 'SYSTEM'
-                ? t('permissionGroups.system', { defaultValue: 'System' })
-                : t('permissionGroups.custom', { defaultValue: 'Custom' })}
+                ? t('permissionGroups.system')
+                : t('permissionGroups.custom')}
             </button>
           ))}
         </div>
@@ -261,10 +261,10 @@ const PermissionGroupsPage = () => {
                   {t('permissionGroups.description')}
                 </th>
                 <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider w-[180px]">
-                  {t('common.permissions', { defaultValue: 'Permissions' })}
+                  {t('common.permissions')}
                 </th>
                 <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider w-[120px] text-right">
-                  {t('tenants.table.actions', { defaultValue: 'Actions' })}
+                  {t('tenants.table.actions')}
                 </th>
               </tr>
             </thead>
@@ -341,7 +341,7 @@ const PermissionGroupsPage = () => {
                           <Trash2 size={14} />
                         </button>
                       ) : (
-                        <div className="w-8 h-8 flex items-center justify-center text-slate-300 dark:text-slate-700" title="System group cannot be deleted">
+                        <div className="w-8 h-8 flex items-center justify-center text-slate-300 dark:text-slate-700" title={t('permissionGroups.systemGroupInfo')}>
                           <Info size={14} />
                         </div>
                       )}
@@ -363,7 +363,7 @@ const PermissionGroupsPage = () => {
               {t('common.noResults')}
             </h3>
             <p className="text-slate-400 dark:text-slate-500 text-[12px] font-medium max-w-sm mx-auto">
-              No permission groups match your current filters. Try adjusting your query or create a new one.
+              {t('permissionGroups.noMatchFilters')}
             </p>
           </div>
         )}
@@ -430,7 +430,7 @@ const PermissionGroupsPage = () => {
                   {t('permissions.features')}
                 </h4>
                 <p className="text-[11px] text-slate-400 dark:text-slate-500">
-                  Select feature modules bundled inside this permission group. ({selectedPermissions.size} selected)
+                  {t('permissionGroups.selectFeatures', { count: selectedPermissions.size })}
                 </p>
               </div>
 
@@ -494,7 +494,7 @@ const PermissionGroupsPage = () => {
               {Object.keys(modalPermissionGroups).length === 0 && (
                 <div className="text-center py-8 text-slate-400 dark:text-slate-500">
                   <Filter size={20} className="mx-auto mb-2 text-slate-300 dark:text-slate-700" />
-                  <span className="text-[12px] font-medium">No catalog permissions match your search query.</span>
+                  <span className="text-[12px] font-medium">{t('permissionGroups.noCatalogMatch')}</span>
                 </div>
               )}
             </div>
@@ -508,7 +508,7 @@ const PermissionGroupsPage = () => {
         onClose={() => setGroupToDelete(null)}
         onConfirm={handleDeleteConfirm}
         title={t('permissionGroups.deleteConfirm', { name: groupToDelete?.name || '' })}
-        message={`Are you sure you want to delete the permission group "${groupToDelete?.name}"? This action will permanently remove the group from the catalog. Existing tenants will retain their current permissions, but the group can no longer be used as a template.`}
+        message={t('permissionGroups.deleteMessage', { name: groupToDelete?.name || '' })}
         confirmText={t('permissionGroups.delete')}
         cancelText={t('common.cancel')}
         type="danger"

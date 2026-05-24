@@ -49,23 +49,20 @@ const TenantsPage = () => {
     if (action === 'suspend') {
       setConfirmModal({
         isOpen: true,
-        title: t('details.suspend', { defaultValue: 'Suspend Tenants' }),
-        message: t('tenants.confirmBulkSuspend', {
-          count: ids.length,
-          defaultValue: `Are you sure you want to suspend the ${ids.length} selected tenant(s)? They will no longer be able to log in or use their workspace channels.`
-        }),
+        title: t('details.suspend'),
+        message: t('tenants.confirmBulkSuspend', { count: ids.length }),
         type: 'danger',
-        confirmText: t('details.suspend', { defaultValue: 'Suspend' }),
+        confirmText: t('details.suspend'),
         onConfirm: async () => {
           setConfirmModal(prev => ({ ...prev, isOpen: false }));
           setActionLoading(true);
           try {
             await Promise.all(ids.map(id => api.updateTenantStatus(id, 'SUSPENDED')));
-            showToast(t('tenants.bulkSuspendSuccess', { count: ids.length, defaultValue: `Successfully suspended ${ids.length} selected tenant(s).` }), 'success');
+            showToast(t('tenants.bulkSuspendSuccess', { count: ids.length }), 'success');
             await queryClient.invalidateQueries({ queryKey: ['tenants'] });
           } catch (err: any) {
             console.error(err);
-            showToast(err.response?.data?.message || t('tenants.bulkSuspendError', { defaultValue: 'Failed to suspend some tenants.' }), 'error');
+            showToast(err.response?.data?.message || t('tenants.bulkSuspendError'), 'error');
           } finally {
             setActionLoading(false);
           }
@@ -82,7 +79,7 @@ const TenantsPage = () => {
           tenantIds: ids,
           mode: data.mode
         });
-        showToast(t('permissionGroups.applySuccessDetailed', { name: groupName, count: ids.length, defaultValue: `Successfully applied permission group "${groupName}" to ${ids.length} tenant(s).` }), 'success');
+        showToast(t('permissionGroups.applySuccessDetailed', { name: groupName, count: ids.length }), 'success');
         await queryClient.invalidateQueries({ queryKey: ['tenants'] });
       } catch (err: any) {
         console.error(err);
@@ -97,16 +94,13 @@ const TenantsPage = () => {
     const nextStatus = currentStatus === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
     const targetTenantName = tenants.find(t => (t._id || t.id) === id)?.name || 'Tenant';
     const confirmTitle = nextStatus === 'SUSPENDED'
-      ? t('details.suspend', { defaultValue: 'Suspend Tenant' })
-      : t('details.activate', { defaultValue: 'Activate Tenant' });
+      ? t('details.suspend')
+      : t('details.activate');
 
     setConfirmModal({
       isOpen: true,
       title: confirmTitle,
-      message: t(nextStatus === 'SUSPENDED' ? 'details.confirmSuspend' : 'details.confirmActivate', {
-        name: targetTenantName,
-        defaultValue: `Are you sure you want to ${nextStatus === 'SUSPENDED' ? 'suspend' : 'activate'} ${targetTenantName}?`
-      }),
+      message: t(nextStatus === 'SUSPENDED' ? 'details.confirmSuspend' : 'details.confirmActivate', { name: targetTenantName }),
       type: nextStatus === 'SUSPENDED' ? 'danger' : 'success',
       confirmText: confirmTitle,
       onConfirm: async () => {
@@ -116,14 +110,14 @@ const TenantsPage = () => {
           await api.updateTenantStatus(id, nextStatus);
           showToast(
             nextStatus === 'ACTIVE'
-              ? t('details.activateSuccess', { name: targetTenantName, defaultValue: `${targetTenantName} has been activated.` })
-              : t('details.suspendSuccess', { name: targetTenantName, defaultValue: `${targetTenantName} has been suspended.` }),
+              ? t('details.activateSuccess', { name: targetTenantName })
+              : t('details.suspendSuccess', { name: targetTenantName }),
             'success'
           );
           await queryClient.invalidateQueries({ queryKey: ['tenants'] });
         } catch (err: any) {
           console.error(err);
-          showToast(err.response?.data?.message || t('details.statusError', { defaultValue: 'Could not change tenant status.' }), 'error');
+          showToast(err.response?.data?.message || t('details.statusError'), 'error');
         } finally {
           setActionLoading(false);
         }
