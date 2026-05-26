@@ -35,6 +35,32 @@ interface PermissionManagerProps {
   hasChanges: boolean;
 }
 
+const REPORT_PERMISSION_GROUP_LABELS: Record<string, string> = {
+  'reports:contact': 'Contact Reports',
+  'reports:deal': 'Deal Reports',
+  'reports:ticket': 'Ticket Reports',
+};
+
+const getPermissionGroupKey = (permission: string) => {
+  const parts = permission.split(':');
+  if (parts[0] === 'reports' && parts.length >= 3) {
+    return `${parts[0]}:${parts[1]}`;
+  }
+  return parts[0] || permission;
+};
+
+const getPermissionGroupTitle = (resource: string) => {
+  return REPORT_PERMISSION_GROUP_LABELS[resource] ?? resource.replace(/_/g, ' ');
+};
+
+const getPermissionActionLabel = (permission: string) => {
+  const parts = permission.split(':');
+  if (parts[0] === 'reports' && parts.length >= 3) {
+    return parts.slice(2).join(':') || permission;
+  }
+  return parts.slice(1).join(':') || permission;
+};
+
 const PermissionManager: React.FC<PermissionManagerProps> = ({
   corePermissions,
   featurePermissions,
@@ -59,7 +85,7 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
   const groupByResource = (perms: string[]) => {
     const groups: Record<string, string[]> = {};
     perms.forEach(p => {
-      const [resource] = p.split(':');
+      const resource = getPermissionGroupKey(p);
       if (!groups[resource]) groups[resource] = [];
       groups[resource].push(p);
     });
@@ -80,7 +106,13 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
     if (!search) return groups;
     const filtered: Record<string, string[]> = {};
     Object.entries(groups).forEach(([resource, perms]) => {
-      const matches = perms.filter(p => p.toLowerCase().includes(search.toLowerCase()) || resource.toLowerCase().includes(search.toLowerCase()));
+      const needle = search.toLowerCase();
+      const title = getPermissionGroupTitle(resource).toLowerCase();
+      const matches = perms.filter(p =>
+        p.toLowerCase().includes(needle) ||
+        resource.toLowerCase().includes(needle) ||
+        title.includes(needle)
+      );
       if (matches.length > 0) filtered[resource] = matches;
     });
     return filtered;
@@ -256,7 +288,7 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
                     <Shield size={18} />
                   </div>
                   <div className="text-left">
-                    <h4 className="text-[15px] font-bold capitalize text-slate-900 dark:text-slate-100">{resource}</h4>
+                    <h4 className="text-[15px] font-bold capitalize text-slate-900 dark:text-slate-100">{getPermissionGroupTitle(resource)}</h4>
                     <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider leading-none mt-1.5">{perms.length} {t('permissions.available')}</p>
                   </div>
                 </div>
@@ -288,7 +320,7 @@ const PermissionManager: React.FC<PermissionManagerProps> = ({
                             className={`flex items-center justify-between p-2.5 rounded-xl border transition-all ${isGranted ? 'bg-primary/5 border-primary/20 shadow-sm' : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 opacity-70'}`}
                           >
                             <span className={`text-[12px] font-mono font-bold truncate mr-2 ${isGranted ? 'text-primary' : 'text-slate-500'}`} title={perm}>
-                              {perm.split(':')[1] || perm}
+                              {getPermissionActionLabel(perm)}
                             </span>
                             
                             {activeTab === 'feature' ? (
