@@ -119,10 +119,10 @@ const SystemSettingsPage = () => {
     <div className="space-y-6 max-w-3xl">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+        <h1 className="text-page-title">
           {t('systemSettings.title')}
         </h1>
-        <p className="text-[13px] text-slate-500 dark:text-slate-400 mt-1">
+        <p className="text-page-subtitle">
           {t('systemSettings.subtitle')}
         </p>
       </div>

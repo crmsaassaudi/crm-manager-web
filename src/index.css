@@ -2,41 +2,56 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN TOKEN SYSTEM — CRM Manager Web
+   ═══════════════════════════════════════════════════════════════
+   This file is the single source of truth for all visual tokens.
+   Every component should reference these tokens instead of
+   hard-coding values. See THEME.md for full documentation.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Tailwind v4 Theme Tokens ─────────────────────────────── */
+
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  
+
+  /* Color Aliases */
   --color-primary: hsl(var(--primary));
   --color-primary-foreground: hsl(var(--primary-foreground));
-  
+
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
-  
+
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
-  
+
   --color-popover: hsl(var(--popover));
   --color-popover-foreground: hsl(var(--popover-foreground));
-  
+
   --color-muted: hsl(var(--muted));
   --color-muted-foreground: hsl(var(--muted-foreground));
-  
+
   --color-accent: hsl(var(--accent));
   --color-accent-foreground: hsl(var(--accent-foreground));
-  
+
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
-  
+
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
-  
+
+  /* Radius Scale */
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
-  
+
+  /* Animations */
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
 }
+
+/* ─── Light Theme Variables ────────────────────────────────── */
 
 @layer base {
   :root {
@@ -60,12 +75,44 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
     --radius: 0.5rem;
-    
+
+    /* Semantic Status Colors */
     --success: 142.1 70.6% 45.3%;
     --warning: 37.9 97.2% 53.9%;
     --danger: 0 84.2% 60.2%;
     --info: 199 89% 48%;
+
+    /* Surface Tokens */
+    --surface-page: #F8FAFC;
+    --surface-card: #FFFFFF;
+    --surface-card-hover: #F8FAFC;
+    --surface-input: #FFFFFF;
+    --surface-muted: #F1F5F9;
+    --surface-sidebar: #FFFFFF;
+    --surface-header: rgba(255, 255, 255, 0.8);
+    --surface-dropdown: #FFFFFF;
+    --surface-modal-backdrop: rgba(15, 23, 42, 0.6);
+
+    /* Border Tokens */
+    --border-card: #E2E8F0;
+    --border-input: #E2E8F0;
+    --border-subtle: #F1F5F9;
+    --border-divider: #F1F5F9;
+
+    /* Text Tokens */
+    --text-heading: #0F172A;
+    --text-body: #475569;
+    --text-muted: #94A3B8;
+    --text-label: #94A3B8;
+
+    /* Shadow Tokens */
+    --shadow-card: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-card-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --shadow-dropdown: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    --shadow-primary-glow: 0 4px 14px -3px hsla(221.2, 83.2%, 53.3%, 0.2);
   }
+
+  /* ─── Dark Theme Variables ─────────────────────────────────── */
 
   .dark {
     --background: 222.2 84% 4.9%;
@@ -87,38 +134,289 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 217.2 91.2% 59.8%;
+
+    --surface-page: #020617;
+    --surface-card: #0F172A;
+    --surface-card-hover: #1E293B;
+    --surface-input: #0F172A;
+    --surface-muted: #1E293B;
+    --surface-sidebar: #0F172A;
+    --surface-header: rgba(15, 23, 42, 0.8);
+    --surface-dropdown: #1E293B;
+    --surface-modal-backdrop: rgba(2, 6, 23, 0.8);
+
+    --border-card: #1E293B;
+    --border-input: #1E293B;
+    --border-subtle: rgba(30, 41, 59, 0.5);
+    --border-divider: #1E293B;
+
+    --text-heading: #F8FAFC;
+    --text-body: #94A3B8;
+    --text-muted: #64748B;
+    --text-label: #64748B;
+
+    --shadow-card: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+    --shadow-card-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+    --shadow-dropdown: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+    --shadow-primary-glow: 0 4px 14px -3px hsla(217.2, 91.2%, 59.8%, 0.2);
   }
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* ─── Base Resets ──────────────────────────────────────────── */
 
 @layer base {
   * {
     @apply border-border;
   }
-  
+
   html, body {
-    @apply cursor-default antialiased text-slate-900 dark:text-slate-100;
+    @apply cursor-default antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
     font-family: 'Inter', var(--font-sans);
     line-height: 1.5;
+    color: var(--text-heading);
   }
 
   a, button, [role="button"], input[type="checkbox"], input[type="radio"], select, .cursor-pointer {
     @apply cursor-pointer;
   }
-  
+
   a *, button *, [role="button"] *, .cursor-pointer * {
     @apply cursor-pointer;
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   SEMANTIC TYPOGRAPHY UTILITIES
+   ═══════════════════════════════════════════════════════════════
+   Use these instead of ad-hoc text-[Xpx] font-Y combinations.
+
+   .text-page-title    — Main page heading (h1)
+   .text-page-subtitle — Below page heading
+   .text-section-title — Card/section heading (h2/h3)
+   .text-section-desc  — Card/section description
+   .text-body          — Normal body text
+   .text-body-sm       — Smaller body text
+   .text-caption       — Small meta text / timestamps
+   .text-label         — Form labels, table headers
+   .text-badge         — Badges, tags, chips
+   .text-stat          — Big numbers (dashboard metrics)
+   ═══════════════════════════════════════════════════════════════ */
+
 @layer utilities {
+
+  /* ── Typography ──────────────────────────────────────────── */
+
+  .text-page-title {
+    @apply text-2xl font-bold tracking-tight;
+    color: var(--text-heading);
+  }
+
+  .text-page-subtitle {
+    @apply text-[13px] font-medium mt-1;
+    color: var(--text-muted);
+  }
+
+  .text-section-title {
+    @apply text-base font-bold;
+    color: var(--text-heading);
+  }
+
+  .text-section-desc {
+    @apply text-[12px];
+    color: var(--text-muted);
+  }
+
+  .text-body {
+    @apply text-[13px] leading-relaxed;
+    color: var(--text-body);
+  }
+
+  .text-body-sm {
+    @apply text-[12px];
+    color: var(--text-body);
+  }
+
+  .text-caption {
+    @apply text-[11px] font-medium;
+    color: var(--text-muted);
+  }
+
+  .text-label {
+    @apply text-[11px] font-bold uppercase tracking-wider;
+    color: var(--text-label);
+  }
+
+  .text-badge {
+    @apply text-[11px] font-bold;
+  }
+
+  .text-stat {
+    @apply text-2xl font-bold tracking-tight;
+    color: var(--text-heading);
+  }
+
+  /* ── Surfaces / Cards ────────────────────────────────────── */
+
+  .card {
+    background: var(--surface-card);
+    border: 1px solid var(--border-card);
+    border-radius: 0.75rem; /* rounded-xl */
+    box-shadow: var(--shadow-card);
+  }
+
+  .card-hover {
+    transition: box-shadow 0.2s ease;
+  }
+  .card-hover:hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  /* ── Form Inputs ─────────────────────────────────────────── */
+
+  .input-field {
+    @apply rounded-lg px-3 py-2 text-[13px] outline-none transition-all;
+    background: var(--surface-input);
+    border: 1px solid var(--border-input);
+    color: var(--text-heading);
+  }
+  .input-field:focus {
+    @apply ring-1 ring-primary/30;
+  }
+  .input-field::placeholder {
+    color: var(--text-muted);
+  }
+
+  /* ── Buttons ─────────────────────────────────────────────── */
+
+  .btn-primary {
+    @apply rounded-xl font-bold text-[13px] transition-all active:scale-[0.98];
+    @apply bg-primary text-primary-foreground;
+    box-shadow: var(--shadow-primary-glow);
+  }
+  .btn-primary:hover {
+    @apply bg-primary/95;
+  }
+  .btn-primary:disabled {
+    @apply opacity-50;
+  }
+
+  .btn-ghost {
+    @apply rounded-xl text-[13px] font-bold transition-colors;
+    border: 1px solid var(--border-card);
+    color: var(--text-body);
+  }
+  .btn-ghost:hover {
+    background: var(--surface-card-hover);
+  }
+
+  /* ── Table ───────────────────────────────────────────────── */
+
+  .table-header-cell {
+    @apply px-4 py-3 text-[11px] font-bold uppercase tracking-wider whitespace-nowrap;
+    color: var(--text-label);
+  }
+
+  .table-row {
+    @apply transition-colors;
+    border-bottom: 1px solid var(--border-divider);
+  }
+  .table-row:hover {
+    background: var(--surface-card-hover);
+  }
+
+  /* ── Badges & Status ─────────────────────────────────────── */
+
+  .badge {
+    @apply inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-bold;
+  }
+
+  .status-badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase border;
+  }
+
+  .status-active {
+    @apply bg-emerald-50 text-emerald-600 border-emerald-500/20;
+  }
+  .dark .status-active {
+    @apply bg-emerald-500/10 text-emerald-400 border-emerald-500/20;
+  }
+
+  .status-suspended {
+    @apply bg-rose-50 text-rose-600 border-rose-500/20;
+  }
+  .dark .status-suspended {
+    @apply bg-rose-500/10 text-rose-400 border-rose-500/20;
+  }
+
+  .status-pending {
+    @apply bg-amber-50 text-amber-600 border-amber-500/20;
+  }
+  .dark .status-pending {
+    @apply bg-amber-500/10 text-amber-400 border-amber-500/20;
+  }
+
+  /* ── Dropdown / Popover ──────────────────────────────────── */
+
+  .dropdown-panel {
+    background: var(--surface-dropdown);
+    border: 1px solid var(--border-card);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-dropdown);
+  }
+
+  /* ── Loading Spinner ─────────────────────────────────────── */
+
+  .spinner {
+    @apply border-2 border-primary border-t-transparent rounded-full animate-spin;
+  }
+  .spinner-sm {
+    @apply w-4 h-4;
+  }
+  .spinner-md {
+    @apply w-6 h-6;
+  }
+  .spinner-lg {
+    @apply w-8 h-8;
+  }
+
+  /* ── Glass Effect ────────────────────────────────────────── */
+
   .glass {
     @apply bg-white/10 backdrop-blur-md border border-white/20;
   }
-  
   .dark .glass {
     @apply bg-black/10 backdrop-blur-md border border-white/10;
+  }
+
+  /* ── Page Layout Helpers ─────────────────────────────────── */
+
+  .page-container {
+    @apply space-y-6;
+  }
+
+  .page-header {
+    @apply flex flex-col sm:flex-row sm:items-center justify-between gap-4;
+  }
+
+  .loading-center {
+    @apply h-64 flex items-center justify-center;
+  }
+
+  /* ── Scrollbar ───────────────────────────────────────────── */
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-card) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--border-card);
+    border-radius: 3px;
   }
 }

@@ -129,8 +129,8 @@ const TenantsPage = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{t('tenants.title')}</h1>
-          <p className="text-[13px] text-slate-500 font-medium mt-1">{t('tenants.subtitle')}</p>
+          <h1 className="text-page-title">{t('tenants.title')}</h1>
+          <p className="text-page-subtitle">{t('tenants.subtitle')}</p>
         </div>
         <button
           onClick={() => navigate('/onboarding')}

@@ -51,7 +51,7 @@ const DashboardPage = () => {
       label: t('dashboard.systemHealth'),
       value: stats?.systemHealth ?? '—',
       icon: Activity,
-      trend: 'Optimal',
+      trend: t('dashboard.trendOptimal'),
       isUp: true,
       color: 'text-indigo-600 dark:text-indigo-400',
       bg: 'bg-indigo-50 dark:bg-indigo-900/20'
@@ -67,8 +67,8 @@ const DashboardPage = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{t('dashboard.title')}</h1>
-        <p className="text-[13px] text-slate-500 font-medium uppercase tracking-wider mt-1">{t('dashboard.subtitle')}</p>
+        <h1 className="text-page-title">{t('dashboard.title')}</h1>
+        <p className="text-page-subtitle">{t('dashboard.subtitle')}</p>
       </div>
 
       {/* Metrics Grid */}

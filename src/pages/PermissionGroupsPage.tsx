@@ -192,10 +192,10 @@ const PermissionGroupsPage = () => {
       {/* Top Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-page-title">
             {t('permissionGroups.title')}
           </h1>
-          <p className="text-[13px] text-slate-500 font-medium mt-1">
+          <p className="text-page-subtitle">
             {t('permissionGroups.subtitle')}
           </p>
         </div>
@@ -249,7 +249,7 @@ const PermissionGroupsPage = () => {
       </div>
 
       {/* Main Groups Table */}
-      <div className="bg-white dark:bg-[#0F172A] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-[#0F172A] rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>

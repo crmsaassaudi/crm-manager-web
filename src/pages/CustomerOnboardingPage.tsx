@@ -128,10 +128,10 @@ const CustomerOnboardingPage = () => {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-page-title">
             {t('onboarding.title')}
           </h1>
-          <p className="text-[13px] text-slate-500 font-medium mt-1">
+          <p className="text-page-subtitle">
             {t('onboarding.subtitle')}
           </p>
         </div>
@@ -196,9 +196,9 @@ const CustomerOnboardingPage = () => {
               onChange={(event) => setForm((c) => ({ ...c, plan: event.target.value as 'FREE' | 'PRO' | 'ENTERPRISE' }))}
               className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-[13px] outline-none focus:ring-1 focus:ring-primary/30 dark:border-slate-800 dark:bg-slate-900 text-slate-900 dark:text-white cursor-pointer"
             >
-              <option value="FREE">Free</option>
-              <option value="PRO">Pro</option>
-              <option value="ENTERPRISE">Enterprise</option>
+              <option value="FREE">{t('onboarding.planFree')}</option>
+              <option value="PRO">{t('onboarding.planPro')}</option>
+              <option value="ENTERPRISE">{t('onboarding.planEnterprise')}</option>
             </select>
             <label className="flex items-center gap-3 rounded-lg border border-slate-200 px-3 py-2 text-[12px] font-semibold text-slate-600 dark:border-slate-800 dark:text-slate-300 cursor-pointer">
               <input
@@ -296,7 +296,7 @@ const CustomerOnboardingPage = () => {
               ref={logContainerRef}
               className="mt-4 bg-slate-950 text-slate-200 font-mono text-[11px] p-4 rounded-xl h-40 overflow-y-auto border border-slate-800 shadow-inner"
             >
-              <p className="text-primary font-bold mb-1">// SYSTEM PROVISIONING LOGS</p>
+              <p className="text-primary font-bold mb-1">// {t('onboarding.systemLogHeader')}</p>
               {status?.subStepLogs && status.subStepLogs.length > 0 ? (
                 status.subStepLogs.map((log, index) => (
                   <div key={index} className="leading-relaxed text-emerald-400/90">{log}</div>
@@ -317,7 +317,7 @@ const CustomerOnboardingPage = () => {
                       {t('onboarding.readyTitle')}
                     </h3>
                     <p className="text-[12px] text-emerald-700/80 dark:text-emerald-300/80">
-                      Tenant id: {status.tenantId}
+                      {t('common.tenantId')}: {status.tenantId}
                     </p>
                   </div>
                   <button
