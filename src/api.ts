@@ -86,6 +86,24 @@ export type DashboardStats = {
   activeUsers: number;
   totalStorageUsedMB: number;
   systemHealth: string;
+  trends: {
+    tenantsTrend: number | null;
+    usersTrend: number | null;
+    storageTrend: number | null;
+  };
+  topStorageConsumers: Array<{
+    tenantId: string;
+    name: string;
+    usedMB: number;
+    limitMB: number;
+  }>;
+  recentActivity: Array<{
+    action: string;
+    actorEmail: string;
+    targetName: string;
+    targetType: string;
+    createdAt: string;
+  }>;
 };
 
 export type FeaturePermissionResponse = {
