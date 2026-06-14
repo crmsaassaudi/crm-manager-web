@@ -1,5 +1,7 @@
 # crm-manager-web — Platform Administration Console
 
+> **Last updated:** 2026-06-14
+>
 > **Stack:** React 19 · Vite 8 · TypeScript 6 · TailwindCSS 4 · React Query · Framer Motion  
 > **Port:** 4201 (Nginx)  
 > **Purpose:** Internal web UI for platform administrators to manage tenants, users, permissions, and system settings  
@@ -13,7 +15,7 @@
 cp .env.example .env
 npm install
 npm run dev
-# App: http://localhost:5173
+# App: http://localhost:5174
 # API proxy: /api → crm-manager-api (port 3001)
 ```
 
@@ -260,7 +262,7 @@ docker run -p 4201:4201 crm-manager-web
 ## Development Commands
 
 ```bash
-npm run dev        # Start dev server (http://localhost:5173)
+npm run dev        # Start dev server (http://localhost:5174)
 npm run build      # TypeScript check + Vite production build → dist/
 npm run preview    # Preview production build locally
 npm run lint       # ESLint
