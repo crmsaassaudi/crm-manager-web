@@ -5,6 +5,7 @@ import {
   Globe,
   Crown,
   HardDrive,
+  Package,
   Power,
   PowerOff,
   Shield,
@@ -23,9 +24,10 @@ import PermissionDiffViewer from '../features/tenants/components/PermissionDiffV
 import CustomDomainTab from '../features/tenants/components/CustomDomainTab';
 import DisasterRecoveryTab from '../features/tenants/components/DisasterRecoveryTab';
 import WebhookMonitorTab from '../features/tenants/components/WebhookMonitorTab';
+import SubscriptionTab from '../features/tenants/components/SubscriptionTab';
 import ConfirmationModal from '../shared/components/ConfirmationModal';
 
-type TabId = 'permissions' | 'domain' | 'backup' | 'webhooks';
+type TabId = 'subscription' | 'permissions' | 'domain' | 'backup' | 'webhooks';
 
 const TenantDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -33,6 +35,7 @@ const TenantDetailPage = () => {
   const { t } = useTranslation();
 
   const TABS: { id: TabId; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
+    { id: 'subscription', label: t('details.tabs.subscription'), icon: Package },
     { id: 'permissions', label: t('details.tabs.permissions'), icon: Shield },
     { id: 'domain', label: t('details.tabs.domain'), icon: Network },
     { id: 'backup', label: t('details.tabs.backup'), icon: DatabaseBackup },
@@ -41,7 +44,7 @@ const TenantDetailPage = () => {
   const { showToast } = useToast();
   const [isPending, startTransition] = useTransition();
 
-  const [activeTab, setActiveTab] = useState<TabId>('permissions');
+  const [activeTab, setActiveTab] = useState<TabId>('subscription');
   const [tenant, setTenant] = useState<Tenant | null>(null);
   const [permData, setPermData] = useState<FeaturePermissionResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -374,6 +377,14 @@ const TenantDetailPage = () => {
 
         {/* Tab Content */}
         <div className="p-6">
+          {activeTab === 'subscription' && (
+            <SubscriptionTab
+              tenantId={tenant.id}
+              tenant={tenant}
+              onTenantUpdated={(updated) => setTenant(updated)}
+            />
+          )}
+
           {activeTab === 'permissions' && (
             <PermissionManager
               corePermissions={permData?.corePermissions ?? []}
